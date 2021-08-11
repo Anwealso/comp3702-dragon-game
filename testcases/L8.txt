@@ -1,0 +1,31 @@
+# num rows, num cols
+24, 40
+# time limit
+80.000
+# cost tgt
+255.4
+# grid data
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+X    EX ==X         P                X X
+X===XXXX =X XXXXXXXXXXXXXXXXX X=XXXX XGX
+X=       =X        =X     G   X=X =X X=X
+X=       =         =X  XXXXXXXX=XX=X X=X
+XXX=XXXX =   XXXXX==X   ===    =  =X X=X
+X  =   X   G     X=   =X=  XXXXXXXXX X=X
+X  =   XXXXXXXX  X=   =X=  X    G     =X
+X  =       X     XXXXXXXXXXX=XXXXXXXXX=X
+X  = X===XXXXX             X=X         X
+XXXXXX = X   X===========XXX=X X= =    X
+X      ==X           =     X=XXXX =  X=X
+XX     ==X      XXXXX=      =     =  X=X
+X G     =XXXXX XXG XXXXX===XXXXXXXXX=XXX
+XXXX    =      X = XX          X    =X X
+X       =  G     = XX     G   XX    =X=X
+XX ==XXXXXXXX=   = XX=XXXXXXXXXXXXX =X=X
+X  =     X  X=   = XX=      X       = =X
+X= ===   X   =       =     XX==   XXXX=X
+X=   =   XXXXXXX=   XXXXX=   =   XX   =X
+X=  X=          =        =  XXXXXX=   =X
+X=  X=   XXXXXXX=     XXXXXXX     =   =X
+X=G X=   G  X   =        G        =X=GXX
+XXXXXX**XXXXXXXXXX**XXXXXXXXXXXX**XXXXXX

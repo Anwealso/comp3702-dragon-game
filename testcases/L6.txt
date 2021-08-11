@@ -1,0 +1,21 @@
+# num rows, num cols
+14, 30
+# time limit
+7.500
+# cost tgt
+48.9
+# grid data
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+XXXXXXXXXXXXX=  ===P========GX
+XXXXXXXXX====   ======= =====X
+XXXXXXX=====    ======   ====X
+XXXXXXX= =====  ===G=========X
+XXXXXX==  ====    ===== ====GX
+XXXXXX===  ===   ======  ====X
+XXXXX====  G=   ======   ====X
+XXX====== ==    ===G==  =====X
+X=======  ===   ======  ====GX
+X=G===== ====    =====   ====X
+XXX========G==    =====  ==XXX
+XXXXX======E==   ==G=====XXXXX
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

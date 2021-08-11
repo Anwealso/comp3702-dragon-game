@@ -1,9 +1,9 @@
 # num rows, num cols
 24, 40
 # time limit
-1.0
+10.500
 # cost tgt
-60.5
+231.5
 # grid data
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 X   ========== X        =====    ===   X
