@@ -14,7 +14,7 @@ This file should include a 'main' method, allowing this file to be executed as a
 Your program should accept 3 command line arguments:
     1) input filename
     2) output filename
-    3) mode (either 'ucs' or 'a*')
+    3) mode (either 'ucs' or 'a_star')
 
 COMP3702 2021 Assignment 1 Support Code
 
@@ -54,7 +54,7 @@ def main(arglist):
     mode = arglist[2]
 
     assert os.path.isfile(input_file), '/!\\ input file does not exist /!\\'
-    assert mode == 'ucs' or mode == 'a*', '/!\\ invalid mode argument /!\\'
+    assert mode == 'ucs' or mode == 'a_star', '/!\\ invalid mode argument /!\\'
 
     # Read the input testcase file
     game_env = GameEnv(input_file)
