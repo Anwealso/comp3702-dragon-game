@@ -7,29 +7,36 @@ from game_state import GameState
 ucs.py
 
 TODO(alex): replace info below
-Template file for you to implement your solution to Assignment 1.
+A file to hold all the ucs function and all of its supporting methods needed to 
+implement ucs search
 
-This file should include a 'main' method, allowing this file to be executed as a program from the command line.
+This file should be imported into the solution.py file and have its ucs() 
+function called from within solution.py
 
-Your program should accept 3 command line arguments:
-    1) input filename
-    2) output filename
-    3) mode (either 'ucs' or 'a_star')
-
-COMP3702 2021 Assignment 1 Support Code
-
-Last updated by njc 04/08/21
+COMP3702 2021 Assignment 1 Code
 """
 
-# HELPER FUNCTIONS...
+# ---------------------------------------------------------------------------- #
+#                               HELPER FUNCTIONS                               #
+# ---------------------------------------------------------------------------- #
+
+# ...
+
+# ...
 
 
-# MAIN FUNCTION...
+# ---------------------------------------------------------------------------- #
+#                                 MAIN FUNCTION                                #
+# ---------------------------------------------------------------------------- #
+
+# Runs the ucs algorithm on the given game_env and returns an optimised list of 
+# actions to get the player through the course
+# 
 # Args:
-#     gamenv
+#     gam_env: an object of class GameEnv, representing the state of the game
 # 
 # Returns:
-#     actions = [] (but filled with correct actions)
+#     actions: a list of moves, e.g. ['wr', 'j', 'gl2']
 def ucs(game_env):
     
     # Read the input testcase file
@@ -47,7 +54,6 @@ def ucs(game_env):
     return actions
 
 if __name__ == '__main__':
-    # main(sys.argv[1:])
     # Do stuff
     pass
 
