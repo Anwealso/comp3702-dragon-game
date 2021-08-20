@@ -4,6 +4,9 @@ import os
 from game_env import GameEnv
 from game_state import GameState
 
+from ucs import ucs
+from a_star import a_star
+
 """
 solution.py
 
@@ -60,16 +63,22 @@ def main(arglist):
     game_env = GameEnv(input_file)
     initial_state = game_env.get_init_state()
 
-    actions = []
-
     #
     #
     # Code for your main method can go here.
     #
-    # Your code should find a sequence of actions for the agent to follow to reach the goal using the search type given
-    # by 'mode', and store this sequence in 'actions'.
-    #
-    #
+    # Your code should find a sequence of actions for the agent to follow to 
+    # reach the goal using the search type given by 'mode', and store this 
+    # sequence in 'actions'.
+
+    if mode == 'ucs':
+        # Run ucs algorithm
+        actions = ucs(game_env)
+
+    if mode == 'a_star':
+        # Run a_star algorithm
+        actions = a_star(game_env)
+
 
     # Write the solution to the output file
     write_output_file(output_file, actions)

@@ -2,3 +2,4 @@ o*.txt
 .idea/
 venv/
 __pycache__/
+.DS_Store
