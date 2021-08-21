@@ -21,15 +21,8 @@ Your program should accept 3 command line arguments:
 
 COMP3702 2021 Assignment 1 Support Code
 
-Last updated by njc 04/08/21
+Last updated by ahn XX/XX/XX
 """
-
-
-#
-#
-# Code for any classes or functions you need can go here.
-#
-#
 
 
 def write_output_file(filename, actions):
@@ -63,8 +56,7 @@ def main(arglist):
     game_env = GameEnv(input_file)
     initial_state = game_env.get_init_state()
 
-    #
-    #
+# ---------------------------------------------------------------------------- #
     # Code for your main method can go here.
     #
     # Your code should find a sequence of actions for the agent to follow to 
@@ -78,7 +70,7 @@ def main(arglist):
     if mode == 'a_star':
         # Run a_star algorithm
         actions = a_star(game_env)
-
+# ---------------------------------------------------------------------------- #
 
     # Write the solution to the output file
     write_output_file(output_file, actions)
