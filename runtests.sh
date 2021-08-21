@@ -4,7 +4,7 @@ failed=0
 
 for i in 1 2 3 4 5 6 7
 do
-    echo "Test $i:"
+    echo "UCS Test $i:"
     # Run the solution script
     python3 solution.py testcases/L$i.txt temp.txt ucs;
     # Preview the temp file
