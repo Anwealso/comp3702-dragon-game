@@ -19,9 +19,9 @@ COMP3702 2021 Assignment 1 Code
 #                         CONSTANTS & GLOBAL VARIABLES                         #
 # ---------------------------------------------------------------------------- #
 
-ACTION_COST = {'wl':1.0, 'wr':1.0, 'j':2.0, 
-        'gl1':0.7, 'gl2':1.0, 'gl3':1.2, 'gr1':0.7, 'gr2':1.0, 'gr3':1.2, 
-        'd1':0.3, 'd2':0.4, 'd3':0.5}
+# ACTION_COST = {'wl':1.0, 'wr':1.0, 'j':2.0, 
+#         'gl1':0.7, 'gl2':1.0, 'gl3':1.2, 'gr1':0.7, 'gr2':1.0, 'gr3':1.2, 
+#         'd1':0.3, 'd2':0.4, 'd3':0.5}
 
 # ---------------------------------------------------------------------------- #
 #                                    CLASSES                                   #
@@ -72,6 +72,7 @@ class Node():
         # Pt2. Check if those actions are legal
         successor_states = {}
         for action in actions:
+            # TODO: Maybe we can find a more efficient way of testing whether this move is legal or not
             (legal, next_state) = game_env.perform_action(self.game_state, action)
             if legal:
                 successor_states[action] = next_state
@@ -79,22 +80,18 @@ class Node():
         # Pt3. convert successor states to successor nodes
         successor_nodes = []
         for (action, state) in successor_states.items():
-            successor_nodes.append( Node(state, action, self.path_cost+ACTION_COST[action], parent=self) )
+            successor_nodes.append( Node(state, action, self.path_cost+game_env.ACTION_COST[action], parent=self) )
 
         return successor_nodes
         
 
+# TODO: Look at maybe whether the encapsulation of this tree object is making things run much slower
 class Tree():
     def __init__(self, root_state):
         self.root = Node(root_state, '', 0)
         self.explored = []
         self.unexplored = [] # <-- this needs to be a queue (pop from front, add to back)
         self.unexplored.append(self.root)
-
-    def show_all_nodes(self):
-        all_nodes = self.explored + self.unexplored
-        print(*all_nodes, sep = "\n")
-        print('Tree Size:' + str(len(all_nodes)), '(Unexplored:' + str(len(self.unexplored)), ', Explored:' + str(len(self.explored))+")")
 
     def show_num_nodes(self):
         all_nodes = self.explored + self.unexplored
@@ -124,12 +121,12 @@ class Tree():
             # print("REACHED END OF UNEXPLORED LIST WITHOUT SOLUTION")
             # print("UH-OH SEARCH PROBLEM IS UNSOLVABLE :(, Raising RuntimeError...")
             raise RuntimeError
-            
         # Move that node to the explored list
         self.explored.append(current_node)
+
         # Get all of the new nodes that expand out from the current node
         successors = current_node.get_successors(game_env)
-
+# ---------------------------------------------------------------------------- #
         # TODO: Look into modifying this loop to reduce compute, since it looks kinda beefy
         # Check if successors contains any states we have visited before
         for successor in successors:
@@ -148,16 +145,6 @@ class Tree():
 
             elif successor.path_cost < previous_visit.path_cost:
                 # Also if we have visited before but this new path is less costly than the last path, add it to the unexplored list, and also remove the previous_visit from the explored nodes list
-                
-                # print(previous_visit)
-                # print(successor)
-                # print("")
-                # print("EXPLORED:")
-                # print(self.explored)
-                # print("")  . 
-                # print("UNEXPLORED:")
-                # print(self.unexplored)
-
                 # Append the new visit
                 self.unexplored.append(successor)
                 # Remove the old visit
@@ -166,9 +153,8 @@ class Tree():
                 except ValueError:
                     self.unexplored.remove(previous_visit)
 
-            else:
-                # Else, prune this node from the sucessor list - it will not be added to the tree for further exploration
-                pass
+            # Else, don't add this node to the unexplored list - it will not be added to the tree for further exploration
+
         return None
 
     def get_path(self, node):
@@ -252,6 +238,8 @@ def ucs(game_env):
     # # Get the path (actions list) to the solution node and return it
     # print("ACTIONS: {}".format(my_tree.get_path(solution)))
     # print("COST: {}".format(my_tree.get_path_cost(solution)))
+
+    my_tree.show_num_nodes()
 
     print("[[ Execution Time: {} Second(s) ]]".format(round((time.time()-start_time), 4)))
 
