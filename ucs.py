@@ -56,7 +56,6 @@ class Node():
         return "<id:{},parent_id:{},row:{},col:{},gem_status:{},edge_action:{}>".format(self.id, parent_id, self.game_state.row, self.game_state.col, self.game_state.gem_status, self.edge_action)
 
     def get_successors(self, game_env):
-        # TODO: Test this function
         # Gets the possible successor nodes from this node.
         # Tries each possible move from current position. For each of the 
         # possible moves, check if the move is legal, and if it is, get the 
@@ -72,7 +71,7 @@ class Node():
         # Pt2. Check if those actions are legal
         successor_states = {}
         for action in actions:
-            # TODO: Maybe we can find a more efficient way of testing whether this move is legal or not
+            # TODO: Maybe we can find a more efficient way of testing whether this move is legal or not?
             (legal, next_state) = game_env.perform_action(self.game_state, action)
             if legal:
                 successor_states[action] = next_state
@@ -95,7 +94,7 @@ class Tree():
 
     def show_num_nodes(self):
         all_nodes = self.explored + self.unexplored
-        print('Tree Size:' + str(len(all_nodes)), '(Unexplored:' + str(len(self.unexplored)), ', Explored:' + str(len(self.explored))+")")
+        print('[[ Tree Size:' + str(len(all_nodes)), '(Unexplored:' + str(len(self.unexplored)), ', Explored:' + str(len(self.explored))+") ]]")
 
     def get_matching_node(self, current_node):
         """ 
@@ -105,6 +104,7 @@ class Tree():
             the matching node -  if there is a node with same game_state
             False -  if there are no matches
         """
+        # TODO: Definitely gonna need to optimise this thicc boi function
         all_nodes = self.explored + self.unexplored
         for node in all_nodes:
             if current_node.game_state == node.game_state:
@@ -138,6 +138,7 @@ class Tree():
                 return successor
 
             # If we have visited this state before, check if this current path is less costly than the previous lowest cost path to this state
+            # TODO: Oh shit - this function call is actually going to use tons of compute, since it checks through "for node in all_nodes". Definitely going to need to optimise this one
             previous_visit = self.get_matching_node(successor)
             if not previous_visit:
                 # If we either haven't visited this node before, add it to the unexplored list
