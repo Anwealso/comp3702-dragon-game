@@ -147,10 +147,11 @@ class Tree():
         # Get the next node to explore
         try: current_node = self.unexplored.pop(0)
         except IndexError:
-            # If we get here then the unexplored list is empty, so just pass and don't explore
-            # TODO: implement end of game detection so we dont ever have to end up here
-            print("REACHED END OF UNEXPLORED LIST")
-            return -1
+            # If we get here, then the tree has explored all possible nodes and found no solution, so raise an error?
+            print("REACHED END OF UNEXPLORED LIST WITHOUT SOLUTION")
+            print("UH-OH SEARCH PROBLEM IS UNSOLVABLE :(, Raising RuntimeError...")
+            raise RuntimeError
+            
         # Move that node to the explored list
         self.explored.append(current_node)
         # Get all of the new nodes that expand out from the current node
@@ -158,8 +159,14 @@ class Tree():
 
         # Check if successors contains any states we have visited before
         for successor in successors:
-            # If we have visited this state before, check if this current path is less costly than the previous lowest cost path to this state
+            # Check if this successor solves the search problem (all gems + exit)
+            if game_env.is_solved(successor.game_state):
+                # Add it to the unexplored list (since it is a fringe node)
+                self.unexplored.append(successor)
+                # Return this solution node
+                return successor
 
+            # If we have visited this state before, check if this current path is less costly than the previous lowest cost path to this state
             previous_visit = self.get_matching_node(successor)
             if not previous_visit:
                 # If we either haven't visited this node before, add it to the unexplored list
@@ -188,7 +195,7 @@ class Tree():
             else:
                 # Else, prune this node from the sucessor list - it will not be added to the tree for further exploration
                 pass
-        return 0
+        return None
 
     def get_path(self, node):
         """
@@ -265,9 +272,17 @@ def ucs(game_env):
 
     # Pop the first element from the unexplored queue and explore it
     i=0
-    while not my_tree.explore(game_env) == -1:
+    running = True
+    while running:
         print("_________Step {}_________".format(i))
-        i = i+1
+        solution = my_tree.explore(game_env)
+        if solution == None:
+            i = i+1
+        else:
+            running = False
+        
+    # If we get here than we have successfully found a solution to the problem (not necessarily optimal)
+    print("YAY, A SOLUTION IS FOUND!\n")
 
     print("Explored:")
     print(my_tree.explored)
@@ -276,19 +291,18 @@ def ucs(game_env):
     print(my_tree.unexplored)
     print("")
 
-    my_tree.show_num_nodes()
-    print("")
 
-    # Get the path to the last node we explored and return that
-    # TODO: update this later to returning the fully solved path
-    actions = my_tree.get_path(my_tree.explored[-1])
-    print("ACTIONS: {}".format(actions))
+    print("Solution:")
+    print(solution)
+    # Get the path (actions list) to the solution node and return it
+    print("ACTIONS: {}".format(my_tree.get_path(solution)))
+    print("COST: {}".format(my_tree.get_path_cost(solution)))
 
     print("Time to execute: {}".format(time.time()-start_time))
 
     print("##########################################")
     # Return the final list of actions
-    return actions
+    return my_tree.get_path(solution)
 
 if __name__ == '__main__':
     # Do stuff
