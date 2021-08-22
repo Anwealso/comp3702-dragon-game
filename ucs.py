@@ -20,12 +20,14 @@ COMP3702 2021 Assignment 1 Code
 #                                    CLASSES                                   #
 # ---------------------------------------------------------------------------- #
 class Node():
-    def __init__(self, game_state, edge_cost, parent=None):
+    def __init__(self, game_state, edge_action, parent=None):
         self.parent = parent
 
         self.game_state = game_state
 
-        self.edge_cost = edge_cost
+        self.edge_action = edge_action # the action we took to get to this node
+
+        # self.edge_cost = edge_cost # TODO: remove edge_cost (since is recoverable from edge_action)
 
         # Try to get an element from the gemstatus list - if no elems throw error
         try: game_state.gem_status[0]
@@ -44,7 +46,7 @@ class Node():
         except:
             parent_id = None
 
-        return "[parent:{},row:{},col:{},gem_status:{},edge_cost:{}]".format(parent_id, self.game_state.row, self.game_state.col, self.game_state.gem_status, self.edge_cost)
+        return "[id:{},parent_id:{},row:{},col:{},gem_status:{},edge_action:{}]".format(self.id, parent_id, self.game_state.row, self.game_state.col, self.game_state.gem_status, self.edge_action)
 
     def get_child_nodes(self,nodes_list):
         for child in self.children:
@@ -66,7 +68,7 @@ class Node():
         #         current node
 
         # Pt1. ge the list of possible actions from this position
-        actions = ['wl', 'wr', 'j', 'd1', 'gl2'] # TODO: un-hardcode this
+        actions = ['wl', 'wr', 'j', 'gl1', 'gl2', 'gl3', 'gr1', 'gr2', 'gr3', 'd1', 'd2', 'd3']
 
         # Pt2. Check if those actions are legal
         successor_states = {}
@@ -78,14 +80,14 @@ class Node():
         # Pt3. convert successor states to successor nodes
         successor_nodes = []
         for (action, state) in successor_states.items():
-            successor_nodes.append( Node(state, get_cost(action), parent=self) )
+            successor_nodes.append( Node(state, action, parent=self) )
 
         return successor_nodes
         
 
 class Tree():
     def __init__(self, root_state):
-        self.root = Node(root_state, 0)
+        self.root = Node(root_state, '')
         self.explored = []
         self.unexplored = [] # <-- this needs to be a queue (pop from front, add to back)
         self.unexplored.append(self.root)
@@ -95,18 +97,21 @@ class Tree():
         print(*all_nodes, sep = "\n")
         print('Tree Size:' + str(len(all_nodes)), '(Unexplored:' + str(len(self.unexplored)), ', Explored:' + str(len(self.explored))+")")
 
+    def show_num_nodes(self):
+        all_nodes = self.explored + self.unexplored
+        print('Tree Size:' + str(len(all_nodes)), '(Unexplored:' + str(len(self.unexplored)), ', Explored:' + str(len(self.explored))+")")
 
-    def mark_explored(self, current_node):
-        # Marks the current_node we have just explored as explored
-        # print("Marking explored: {}".format(current_node))
-        # Add the node to the explored list
-        self.explored.append(current_node)
-        # Remove the current_node from the unexplored list
-        for node in self.unexplored:
-            if node.id == current_node.id:
-                # If we find a node with the same id in the unexplored list (we 
-                # should always find exactly one), then remove it from the list
-                self.unexplored.remove(node)
+    # def mark_explored(self, current_node):
+    #     # Marks the current_node we have just explored as explored
+    #     # print("Marking explored: {}".format(current_node))
+    #     # Add the node to the explored list
+    #     self.explored.append(current_node)
+    #     # Remove the current_node from the unexplored list
+    #     for node in self.unexplored:
+    #         if node.id == current_node.id:
+    #             # If we find a node with the same id in the unexplored list (we 
+    #             # should always find exactly one), then remove it from the list
+    #             self.unexplored.remove(node)
 
     def add_node(self, parent, node):
         # Adds an unexplored node to the tree given a node object and a parent node object
@@ -127,13 +132,25 @@ class Tree():
         # Move that node to the explored list
         self.explored.append(current_node)
         # Add the new nodes found to the unexplored list
-        self.unexplored.append(current_node.get_successors(game_env))
+        self.unexplored = self.unexplored + current_node.get_successors(game_env)
 
-    def get_path(node):
-        """Gets the full path to node from the initial starting point"""
-        # TODO: Implement this function
-        pass
+    def get_path(self, node):
+        """
+        Gets the full path to node from the initial starting point
+        
+        Works by recursively finding the path of the parent
+        
+        """
+        # print(1)
 
+        # Check to see if i have no parent (i.e. im the root node) (base case) 
+        if node.parent == None:
+            # print("I have no parent")
+            return []
+        else:
+            # print("My edge action: {}. Looking up parent ...".format(node.edge_action))
+            path = self.get_path(node.parent) + [node.edge_action]
+            return path
 
 # ---------------------------------------------------------------------------- #
 #                               HELPER FUNCTIONS                               #
@@ -180,11 +197,9 @@ def ucs(game_env):
     my_tree =  Tree(initial_state)
 
     # Pop the first element from the unexplored queue and explore it
-    my_tree.explore(game_env)
-
-    print("All Nodes:")
-    my_tree.show_all_nodes()
-    print("")
+    for i in range(200):
+        my_tree.explore(game_env)
+        print("_________Step {}_________".format(i))
 
     print("Explored:")
     print(my_tree.explored)
@@ -193,10 +208,13 @@ def ucs(game_env):
     print(my_tree.unexplored)
     print("")
 
+    my_tree.show_num_nodes()
+    print("")
+
     # Get the path to the last node we explored and return that
     # TODO: update this later to returning the fully slved path
-    # actions = my_tree.get_path(my_tree.explored[-1])
-    actions = ['wr', 'wl', 'wr']
+    actions = my_tree.get_path(my_tree.explored[-1])
+    print("ACTIONS: {}".format(actions))
 
     print("##########################################")
     # Return the final list of actions
