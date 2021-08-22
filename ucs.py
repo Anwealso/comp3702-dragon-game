@@ -27,12 +27,14 @@ ACTION_COST = {'wl':1.0, 'wr':1.0, 'j':2.0,
 #                                    CLASSES                                   #
 # ---------------------------------------------------------------------------- #
 class Node():
-    def __init__(self, game_state, edge_action, parent=None):
+    def __init__(self, game_state, edge_action, path_cost, parent=None):
         self.parent = parent
 
         self.game_state = game_state
 
         self.edge_action = edge_action # the action we took to get to this node
+
+        self.path_cost = path_cost # the cost of the full path to this node from the initial node
 
         # self.edge_cost = edge_cost # TODO: remove edge_cost (since is recoverable from edge_action)
 
@@ -77,14 +79,14 @@ class Node():
         # Pt3. convert successor states to successor nodes
         successor_nodes = []
         for (action, state) in successor_states.items():
-            successor_nodes.append( Node(state, action, parent=self) )
+            successor_nodes.append( Node(state, action, self.path_cost+ACTION_COST[action], parent=self) )
 
         return successor_nodes
         
 
 class Tree():
     def __init__(self, root_state):
-        self.root = Node(root_state, '')
+        self.root = Node(root_state, '', 0)
         self.explored = []
         self.unexplored = [] # <-- this needs to be a queue (pop from front, add to back)
         self.unexplored.append(self.root)
@@ -144,7 +146,7 @@ class Tree():
                 # If we either haven't visited this node before, add it to the unexplored list
                 self.unexplored.append(successor)
 
-            elif self.get_path_cost(successor) < self.get_path_cost(previous_visit):
+            elif successor.path_cost < previous_visit.path_cost:
                 # Also if we have visited before but this new path is less costly than the last path, add it to the unexplored list, and also remove the previous_visit from the explored nodes list
                 
                 # print(previous_visit)
@@ -185,18 +187,18 @@ class Tree():
             path = self.get_path(node.parent) + [node.edge_action]
             return path
 
-    def get_path_cost(self, node):
-        """
-        Gets the cost of the full path to node from the initial starting point
+    # def get_path_cost(self, node):
+    #     """
+    #     Gets the cost of the full path to node from the initial starting point
         
-        Works by using the code we already wrote for get_path
+    #     Works by using the code we already wrote for get_path
         
-        """
-        path = self.get_path(node)
-        total_cost = 0
-        for action in path:
-            total_cost = total_cost + ACTION_COST[action]
-        return total_cost
+    #     """
+    #     path = self.get_path(node)
+    #     total_cost = 0
+    #     for action in path:
+    #         total_cost = total_cost + ACTION_COST[action]
+    #     return total_cost
 
 # ---------------------------------------------------------------------------- #
 #                               HELPER FUNCTIONS                               #
