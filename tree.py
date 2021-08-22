@@ -7,9 +7,6 @@
 class Tree():
     def __init__(self,root):
         self.root = root
-        self.id = None
-        # self.children = []
-
         self.explored = []
         self.unexplored = []
 
@@ -154,21 +151,6 @@ my_tree.mark_explored(current_node)
         
 
 
-# current_node.addNode((2,2), '0b01000', 0.8)
-
-# solution_node = current_node.children[0]
-
-# FunCorp.children[0].addNode(Node('General manager of Fun'))
-# FunCorp.children[1].addNode(Node('General manager Shindings'))
-# FunCorp.children[0].children[0].addNode(Node('Sub manager of Fun'))
-# FunCorp.children[0].children[0].children[0].addNode(Node('Employee of the month'))
-
-# print(my_tree.root) # ask the Tree for it's root.
-# print("")
-
-# print(my_tree.root.children)
-# print("")
-
 print("All Nodes:")
 my_tree.show_all_nodes()
 print("")
@@ -177,8 +159,6 @@ print("")
 print("Explored:")
 print(my_tree.explored)
 print("")
-
-
 print("Unexplored:")
 print(my_tree.unexplored)
 print("")
