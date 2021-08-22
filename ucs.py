@@ -2,6 +2,7 @@ print("Imported ucs algorithm")
 
 from game_env import GameEnv
 from game_state import GameState
+import time
 
 """
 ucs.py
@@ -46,7 +47,7 @@ class Node():
         except:
             parent_id = None
 
-        return "[id:{},parent_id:{},row:{},col:{},gem_status:{},edge_action:{}]".format(self.id, parent_id, self.game_state.row, self.game_state.col, self.game_state.gem_status, self.edge_action)
+        return "<id:{},parent_id:{},row:{},col:{},gem_status:{},edge_action:{}>\n".format(self.id, parent_id, self.game_state.row, self.game_state.col, self.game_state.gem_status, self.edge_action)
 
     def get_child_nodes(self,nodes_list):
         for child in self.children:
@@ -126,13 +127,68 @@ class Tree():
             parent.children.append(node)
             self.unexplored.append(node)
 
+    def get_matching_node(self, current_node):
+        """ 
+        Checks whether the tree already contains a node with the same gamestate.
+
+        Returns:
+            the matching node -  if there is a node with same game_state
+            False -  if there are no matches
+        """
+        all_nodes = self.explored + self.unexplored
+        for node in all_nodes:
+            if current_node.game_state == node.game_state:
+                # This node has the same game_state as our current node, so return True
+                return node
+        # If we get to here without returning True, then we have gone through the whole list of nodes without finding any with a matching game_state, so return False
+        return None
+
     def explore(self, game_env):
         # Get the next node to explore
-        current_node = self.unexplored.pop(0)
+        try: current_node = self.unexplored.pop(0)
+        except IndexError:
+            # If we get here then the unexplored list is empty, so just pass and don't explore
+            # TODO: implement end of game detection so we dont ever have to end up here
+            print("REACHED END OF UNEXPLORED LIST")
+            return -1
         # Move that node to the explored list
         self.explored.append(current_node)
-        # Add the new nodes found to the unexplored list
-        self.unexplored = self.unexplored + current_node.get_successors(game_env)
+        # Get all of the new nodes that expand out from the current node
+        successors = current_node.get_successors(game_env)
+
+        # Check if successors contains any states we have visited before
+        for successor in successors:
+            # If we have visited this state before, check if this current path is less costly than the previous lowest cost path to this state
+
+            previous_visit = self.get_matching_node(successor)
+            if not previous_visit:
+                # If we either haven't visited this node before, add it to the unexplored list
+                self.unexplored.append(successor)
+
+            elif self.get_path_cost(successor) < self.get_path_cost(previous_visit):
+                # Also if we have visited before but this new path is less costly than the last path, add it to the unexplored list, and also remove the previous_visit from the explored nodes list
+                
+                # print(previous_visit)
+                # print(successor)
+                # print("")
+                # print("EXPLORED:")
+                # print(self.explored)
+                # print("")  . 
+                # print("UNEXPLORED:")
+                # print(self.unexplored)
+
+                # Append the new visit
+                self.unexplored.append(successor)
+                # Remove the old visit
+                try: 
+                    self.explored.remove(previous_visit)
+                except ValueError:
+                    self.unexplored.remove(previous_visit)
+
+            else:
+                # Else, prune this node from the sucessor list - it will not be added to the tree for further exploration
+                pass
+        return 0
 
     def get_path(self, node):
         """
@@ -141,8 +197,6 @@ class Tree():
         Works by recursively finding the path of the parent
         
         """
-        # print(1)
-
         # Check to see if i have no parent (i.e. im the root node) (base case) 
         if node.parent == None:
             # print("I have no parent")
@@ -152,10 +206,23 @@ class Tree():
             path = self.get_path(node.parent) + [node.edge_action]
             return path
 
+    def get_path_cost(self, node):
+        """
+        Gets the cost of the full path to node from the initial starting point
+        
+        Works by using the code we already wrote for get_path
+        
+        """
+        path = self.get_path(node)
+        total_cost = 0
+        for action in path:
+            total_cost = total_cost + get_move_cost(action)
+        return total_cost
+
 # ---------------------------------------------------------------------------- #
 #                               HELPER FUNCTIONS                               #
 # ---------------------------------------------------------------------------- #
-def get_cost(move):
+def get_move_cost(move):
     # Gets the possible successor nodes from this node.
     # Tries each possible move from current position. For each of the 
     # possible moves, check if the move is legal, and if it is, get the 
@@ -187,9 +254,9 @@ def get_cost(move):
 #     actions: a list of moves, e.g. ['wr', 'j', 'gl2']
 def ucs(game_env):
     print("##########################################")
-
     # Do stuff
     print("Running ucs algorithm...")
+    start_time = time.time()
 
     # Read the input testcase file
     initial_state = game_env.get_init_state()
@@ -197,9 +264,10 @@ def ucs(game_env):
     my_tree =  Tree(initial_state)
 
     # Pop the first element from the unexplored queue and explore it
-    for i in range(200):
-        my_tree.explore(game_env)
+    i=0
+    while not my_tree.explore(game_env) == -1:
         print("_________Step {}_________".format(i))
+        i = i+1
 
     print("Explored:")
     print(my_tree.explored)
@@ -212,9 +280,11 @@ def ucs(game_env):
     print("")
 
     # Get the path to the last node we explored and return that
-    # TODO: update this later to returning the fully slved path
+    # TODO: update this later to returning the fully solved path
     actions = my_tree.get_path(my_tree.explored[-1])
     print("ACTIONS: {}".format(actions))
+
+    print("Time to execute: {}".format(time.time()-start_time))
 
     print("##########################################")
     # Return the final list of actions
