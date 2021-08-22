@@ -47,7 +47,7 @@ class Node():
         except:
             parent_id = None
 
-        return "<id:{},parent_id:{},row:{},col:{},gem_status:{},edge_action:{}>\n".format(self.id, parent_id, self.game_state.row, self.game_state.col, self.game_state.gem_status, self.edge_action)
+        return "<id:{},parent_id:{},row:{},col:{},gem_status:{},edge_action:{}>".format(self.id, parent_id, self.game_state.row, self.game_state.col, self.game_state.gem_status, self.edge_action)
 
     def get_child_nodes(self,nodes_list):
         for child in self.children:
@@ -260,7 +260,7 @@ def get_move_cost(move):
 # Returns:
 #     actions: a list of moves, e.g. ['wr', 'j', 'gl2']
 def ucs(game_env):
-    print("##########################################")
+    print("########################")
     # Do stuff
     print("Running ucs algorithm...")
     start_time = time.time()
@@ -274,7 +274,7 @@ def ucs(game_env):
     i=0
     running = True
     while running:
-        print("_________Step {}_________".format(i))
+        # print("_________Step {}_________".format(i))
         solution = my_tree.explore(game_env)
         if solution == None:
             i = i+1
@@ -282,14 +282,14 @@ def ucs(game_env):
             running = False
         
     # If we get here than we have successfully found a solution to the problem (not necessarily optimal)
-    print("YAY, A SOLUTION IS FOUND!\n")
+    # print("YAY, A SOLUTION IS FOUND!")
 
-    print("Explored:")
-    print(my_tree.explored)
-    print("")
-    print("Unexplored:")
-    print(my_tree.unexplored)
-    print("")
+    # print("Explored:")
+    # print(my_tree.explored)
+    # print("")
+    # print("Unexplored:")
+    # print(my_tree.unexplored)
+    # print("")
 
 
     print("Solution:")
@@ -298,9 +298,9 @@ def ucs(game_env):
     print("ACTIONS: {}".format(my_tree.get_path(solution)))
     print("COST: {}".format(my_tree.get_path_cost(solution)))
 
-    print("Time to execute: {}".format(time.time()-start_time))
+    print("Time to execute: {} second(s)".format(round((time.time()-start_time), 4)))
 
-    print("##########################################")
+    print("########################")
     # Return the final list of actions
     return my_tree.get_path(solution)
 

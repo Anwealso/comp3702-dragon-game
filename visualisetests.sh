@@ -12,10 +12,10 @@ then
     # cat temp.txt
     # Run the tests
     python3 visualiser.py testcases/L$1.txt temp.txt
-    # Save the output status
+    # Save the output status, overwriting temp
     echo $? > temp.txt
     exitcode=$(cat temp.txt)
-    echo "[[ Exit status: $exitcode ]]"
+    # echo "[[ Exit status: $exitcode ]]"
 
     # If exit code == 0, then passed, otherwise failed
     if [ $exitcode -eq 0 ]
@@ -34,7 +34,7 @@ then
 
 else
     # If user doesn't give a specific test no., do all the tests
-    for i in 1 2 3 4 5 6 7
+    for i in 1 2 3 4 5 6 7 8
     do
         echo "UCS Test $i:"
         # Run the solution script
@@ -43,10 +43,10 @@ else
         # cat temp.txt
         # Run the tests
         python3 visualiser.py testcases/L$i.txt temp.txt
-        # Save the output status
+        # Save the output status, overwriting temp
         echo $? > temp.txt
         exitcode=$(cat temp.txt)
-        echo "[[ Exit status: $exitcode ]]"
+        # echo "[[ Exit status: $exitcode ]]"
 
         # If exit code == 0, then passed, otherwise failed
         if [ $exitcode -eq 0 ]

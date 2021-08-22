@@ -12,7 +12,7 @@ then
     # cat temp.txt
     # Run the tests
     python3 tester.py testcases/L$1.txt temp.txt
-    # Save the output status
+    # Save the output status, overwriting temp
     echo $? > temp.txt
     exitcode=$(cat temp.txt)
     echo "[[ Exit status: $exitcode ]]"
@@ -33,7 +33,7 @@ then
     echo ""
 
 else
-    for i in 1 2 3 4 5 6 7
+    for i in 1 2 3 4 5 6 7 8
     do
         echo "UCS Test $i:"
         # Run the solution script
@@ -42,7 +42,7 @@ else
         # cat temp.txt
         # Run the tests
         python3 tester.py testcases/L$i.txt temp.txt
-        # Save the output status
+        # Save the output status, overwriting temp
         echo $? > temp.txt
         exitcode=$(cat temp.txt)
         echo "[[ Exit status: $exitcode ]]"
