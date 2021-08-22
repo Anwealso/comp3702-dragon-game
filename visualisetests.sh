@@ -5,7 +5,7 @@ failed=0
 if [ $1 ]
 then
     # If user inputs a specific test no., then run that
-    echo "UCS Test $1:"
+    echo "[[ UCS Test $1: ]]"
     # Run the solution script
     python3 solution.py testcases/L$1.txt temp.txt ucs;
     # Preview the temp file
@@ -36,7 +36,7 @@ else
     # If user doesn't give a specific test no., do all the tests
     for i in 1 2 3 4 5 6 7 8
     do
-        echo "UCS Test $i:"
+        echo "[[ UCS Test $i: ]]"
         # Run the solution script
         python3 solution.py testcases/L$i.txt temp.txt ucs;
         # Preview the temp file

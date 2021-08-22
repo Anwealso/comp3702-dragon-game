@@ -119,8 +119,8 @@ class Tree():
         try: current_node = self.unexplored.pop(0)
         except IndexError:
             # If we get here, then the tree has explored all possible nodes and found no solution, so raise an error?
-            print("REACHED END OF UNEXPLORED LIST WITHOUT SOLUTION")
-            print("UH-OH SEARCH PROBLEM IS UNSOLVABLE :(, Raising RuntimeError...")
+            # print("REACHED END OF UNEXPLORED LIST WITHOUT SOLUTION")
+            # print("UH-OH SEARCH PROBLEM IS UNSOLVABLE :(, Raising RuntimeError...")
             raise RuntimeError
             
         # Move that node to the explored list
@@ -128,6 +128,7 @@ class Tree():
         # Get all of the new nodes that expand out from the current node
         successors = current_node.get_successors(game_env)
 
+        # TODO: Look into modifying this loop to reduce compute, since it looks kinda beefy
         # Check if successors contains any states we have visited before
         for successor in successors:
             # Check if this successor solves the search problem (all gems + exit)
@@ -215,9 +216,9 @@ class Tree():
 # Returns:
 #     actions: a list of moves, e.g. ['wr', 'j', 'gl2']
 def ucs(game_env):
-    print("########################")
+    # print("########################")
     # Do stuff
-    print("Running ucs algorithm...")
+    # print("Running ucs algorithm...")
     start_time = time.time()
 
     # Read the input testcase file
@@ -226,14 +227,11 @@ def ucs(game_env):
     my_tree =  Tree(initial_state)
 
     # Pop the first element from the unexplored queue and explore it
-    i=0
+
     running = True
     while running:
-        # print("_________Step {}_________".format(i))
         solution = my_tree.explore(game_env)
-        if solution == None:
-            i = i+1
-        else:
+        if solution != None:
             running = False
         
     # If we get here than we have successfully found a solution to the problem (not necessarily optimal)
@@ -247,15 +245,15 @@ def ucs(game_env):
     # print("")
 
 
-    print("Solution:")
-    print(solution)
-    # Get the path (actions list) to the solution node and return it
-    print("ACTIONS: {}".format(my_tree.get_path(solution)))
-    print("COST: {}".format(my_tree.get_path_cost(solution)))
+    # print("Solution:")
+    # print(solution)
+    # # Get the path (actions list) to the solution node and return it
+    # print("ACTIONS: {}".format(my_tree.get_path(solution)))
+    # print("COST: {}".format(my_tree.get_path_cost(solution)))
 
-    print("Time to execute: {} second(s)".format(round((time.time()-start_time), 4)))
+    print("[[ Execution Time: {} Second(s) ]]".format(round((time.time()-start_time), 4)))
 
-    print("########################")
+    # print("########################")
     # Return the final list of actions
     return my_tree.get_path(solution)
 
