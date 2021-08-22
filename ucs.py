@@ -16,6 +16,14 @@ COMP3702 2021 Assignment 1 Code
 """
 
 # ---------------------------------------------------------------------------- #
+#                         CONSTANTS & GLOBAL VARIABLES                         #
+# ---------------------------------------------------------------------------- #
+
+ACTION_COST = {'wl':1.0, 'wr':1.0, 'j':2.0, 
+        'gl1':0.7, 'gl2':1.0, 'gl3':1.2, 'gr1':0.7, 'gr2':1.0, 'gr3':1.2, 
+        'd1':0.3, 'd2':0.4, 'd3':0.5}
+
+# ---------------------------------------------------------------------------- #
 #                                    CLASSES                                   #
 # ---------------------------------------------------------------------------- #
 class Node():
@@ -51,6 +59,7 @@ class Node():
         # Tries each possible move from current position. For each of the 
         # possible moves, check if the move is legal, and if it is, get the 
         # resultant node for that move and add is to the successors list
+        # 
         # Returns:
         #     successors: a list of nodes it is possible to visit from the 
         #         current node
@@ -185,28 +194,12 @@ class Tree():
         path = self.get_path(node)
         total_cost = 0
         for action in path:
-            total_cost = total_cost + get_move_cost(action)
+            total_cost = total_cost + ACTION_COST[action]
         return total_cost
 
 # ---------------------------------------------------------------------------- #
 #                               HELPER FUNCTIONS                               #
 # ---------------------------------------------------------------------------- #
-def get_move_cost(move):
-    # Gets the possible successor nodes from this node.
-    # Tries each possible move from current position. For each of the 
-    # possible moves, check if the move is legal, and if it is, get the 
-    # resultant node for that move and add is to the successors list
-    # Args:
-    #     move: a string representing a move, e.g. 'wr', 'j'
-    # Returns:
-    #     cost: the cost of the given move (as a float)
-
-    cost_dict = {'wl':1.0, 'wr':1.0, 'j':2.0, 
-        'gl1':0.7, 'gl2':1.0, 'gl3':1.2, 'gr1':0.7, 'gr2':1.0, 'gr3':1.2, 
-        'd1':0.3, 'd2':0.4, 'd3':0.5}
-    cost = cost_dict[move]
-
-    return cost
 
 
 # ---------------------------------------------------------------------------- #
