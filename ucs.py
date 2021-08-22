@@ -44,7 +44,7 @@ class Node():
         except:
             parent_id = None
 
-        return "[parent:{}, row:{}, col:{}, gem_status:{}, edge_cost:{}]".format(parent_id, self.game_state.row, self.game_state.col, self.game_state.gem_status, self.edge_cost)
+        return "[parent:{},row:{},col:{},gem_status:{},edge_cost:{}]".format(parent_id, self.game_state.row, self.game_state.col, self.game_state.gem_status, self.edge_cost)
 
     def get_child_nodes(self,nodes_list):
         for child in self.children:
@@ -65,12 +65,11 @@ class Node():
         #     successors: a list of nodes it is possible to visit from the 
         #         current node
 
-        successor_states = {}
-
         # Pt1. ge the list of possible actions from this position
-        actions = ['wl', 'wr', 'j'] # TODO: un-hardcode this
+        actions = ['wl', 'wr', 'j', 'd1', 'gl2'] # TODO: un-hardcode this
 
         # Pt2. Check if those actions are legal
+        successor_states = {}
         for action in actions:
             (legal, next_state) = game_env.perform_action(self.game_state, action)
             if legal:
@@ -79,22 +78,16 @@ class Node():
         # Pt3. convert successor states to successor nodes
         successor_nodes = []
         for (action, state) in successor_states.items():
-            successor_nodes.append( Node(state, get_cost(action)) )
+            successor_nodes.append( Node(state, get_cost(action), parent=self) )
 
-        """
-        Perform the given action on the given state, and return whether the action was successful (i.e. valid and
-        collision free) and the resulting new state.
-        :param state: current GameState
-        :param action: an element of self.ACTIONS
-        :return: (successful [True/False], next_state [GameState])
-        """
+        return successor_nodes
         
 
 class Tree():
     def __init__(self, root_state):
         self.root = Node(root_state, 0)
         self.explored = []
-        self.unexplored = []
+        self.unexplored = [] # <-- this needs to be a queue (pop from front, add to back)
         self.unexplored.append(self.root)
 
     def show_all_nodes(self):
@@ -127,6 +120,19 @@ class Tree():
             node.parent = parent
             parent.children.append(node)
             self.unexplored.append(node)
+
+    def explore(self, game_env):
+        # Get the next node to explore
+        current_node = self.unexplored.pop(0)
+        # Move that node to the explored list
+        self.explored.append(current_node)
+        # Add the new nodes found to the unexplored list
+        self.unexplored.append(current_node.get_successors(game_env))
+
+    def get_path(node):
+        """Gets the full path to node from the initial starting point"""
+        # TODO: Implement this function
+        pass
 
 
 # ---------------------------------------------------------------------------- #
@@ -173,6 +179,9 @@ def ucs(game_env):
     # Init the tree data structure
     my_tree =  Tree(initial_state)
 
+    # Pop the first element from the unexplored queue and explore it
+    my_tree.explore(game_env)
+
     print("All Nodes:")
     my_tree.show_all_nodes()
     print("")
@@ -184,6 +193,9 @@ def ucs(game_env):
     print(my_tree.unexplored)
     print("")
 
+    # Get the path to the last node we explored and return that
+    # TODO: update this later to returning the fully slved path
+    # actions = my_tree.get_path(my_tree.explored[-1])
     actions = ['wr', 'wl', 'wr']
 
     print("##########################################")
