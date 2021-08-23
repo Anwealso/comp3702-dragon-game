@@ -29,13 +29,9 @@ COMP3702 2021 Assignment 1 Code
 class Node():
     def __init__(self, game_state, edge_action, path_cost, parent=None):
         self.parent = parent
-
         self.game_state = game_state
-
         self.edge_action = edge_action # the action we took to get to this node
-
         self.path_cost = path_cost # the cost of the full path to this node from the initial node
-
         # self.edge_cost = edge_cost # TODO: remove edge_cost (since is recoverable from edge_action)
 
         # Try to get an element from the gemstatus list - if no elems throw error
@@ -54,6 +50,10 @@ class Node():
             parent_id = None
 
         return "<id:{},parent_id:{},row:{},col:{},gem_status:{},edge_action:{}>".format(self.id, parent_id, self.game_state.row, self.game_state.col, self.game_state.gem_status, self.edge_action)
+
+    def __hash__(self):
+        # TODO: Check if putting self.parent in the hash function is bad/slow
+        return hash((self.game_state, self.path_cost))
 
     def get_successors(self, game_env):
         # Gets the possible successor nodes from this node.
@@ -88,12 +88,14 @@ class Node():
 class Tree():
     def __init__(self, root_state):
         self.root = Node(root_state, '', 0)
-        self.explored = []
+        self.explored = set()
         self.unexplored = [] # <-- this needs to be a queue (pop from front, add to back)
         self.unexplored.append(self.root)
 
     def show_num_nodes(self):
-        all_nodes = self.explored + self.unexplored
+        all_nodes = list(self.unexplored)
+        for node in self.explored:
+            all_nodes.append(node)
         print('[[ Tree Size:' + str(len(all_nodes)), '(Unexplored:' + str(len(self.unexplored)), ', Explored:' + str(len(self.explored))+") ]]")
 
     def get_matching_node(self, current_node):
@@ -105,16 +107,23 @@ class Tree():
             False -  if there are no matches
         """
         # TODO: Definitely gonna need to optimise this thicc boi function
-        all_nodes = self.explored + self.unexplored
-        for node in all_nodes:
-            if current_node.game_state == node.game_state:
+        for explored_node in self.explored:
+            # XXX this should simply check the hashes - i.e. the game_states of the nodes
+            if current_node.game_state == explored_node.game_state:
                 # This node has the same game_state as our current node, so return True
-                return node
+                return explored_node
+        for unexplored_node in self.unexplored:
+            # XXX this should simply check the hashes - i.e. the game_states of the nodes
+            if current_node.game_state == unexplored_node.game_state:
+                # This node has the same game_state as our current node, so return True
+                return unexplored_node        
+        
         # If we get to here without returning True, then we have gone through the whole list of nodes without finding any with a matching game_state, so return False
         return None
 
     def explore(self, game_env):
         # Get the next node to explore
+        # TODO: Implement PriorityQueue, so that the queue is sorted by lowest cost first
         try: current_node = self.unexplored.pop(0)
         except IndexError:
             # If we get here, then the tree has explored all possible nodes and found no solution, so raise an error?
@@ -122,7 +131,7 @@ class Tree():
             # print("UH-OH SEARCH PROBLEM IS UNSOLVABLE :(, Raising RuntimeError...")
             raise RuntimeError
         # Move that node to the explored list
-        self.explored.append(current_node)
+        self.explored.add(current_node)
 
         # Get all of the new nodes that expand out from the current node
         successors = current_node.get_successors(game_env)
@@ -149,10 +158,15 @@ class Tree():
                 # Append the new visit
                 self.unexplored.append(successor)
                 # Remove the old visit
-                try: 
-                    self.explored.remove(previous_visit)
-                except ValueError:
-                    self.unexplored.remove(previous_visit)
+                try: self.unexplored.remove(previous_visit)
+                except:
+                    pass
+                # XXX: Got rid of the below because fuck it we'll just leave the unoptimal nodes in the explored list
+                # try: 
+                #     # TODO: check if this is allowable - i though somewhere said sets couldnt be removed from
+                #     self.unexplored.remove(previous_visit)
+                # except (ValueError, KeyError):
+                #     self.explored.remove(previous_visit)                    
 
             # Else, don't add this node to the unexplored list - it will not be added to the tree for further exploration
 

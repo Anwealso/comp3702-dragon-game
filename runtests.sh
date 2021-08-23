@@ -65,4 +65,4 @@ else
     done
 fi
 
-echo "Passed: $passed, Failed: $failed"
+echo "[[ Passed: $passed, Failed: $failed ]]"
