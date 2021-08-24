@@ -32,21 +32,11 @@ class Node():
     def __init__(self, game_state, edge_action, path_cost, parent=None):
         self.parent = parent
         self.game_state = game_state
-
         self.edge_action = edge_action # the action we took to get to this node
-        # TODO: get rid of this field, since the path cost is stored in the priorityqueue item tuple anyways
         self.path_cost = path_cost # the cost of the full path to this node from the initial node
 
-        self.id = "#{}#{}#".format(game_state.row, game_state.col)
-        for item in game_state.gem_status:
-            self.id = self.id + str(item)
-
     def __repr__(self):
-        try: parent_id = self.parent.id
-        except:
-            parent_id = None
-
-        return "<id:{},parent_id:{},row:{},col:{},gem_status:{},edge_action:{},path_cost:{}>".format(self.id, parent_id, self.game_state.row, self.game_state.col, self.game_state.gem_status, self.edge_action, self.path_cost)
+        return "<row:{},col:{},gem_status:{},edge_action:{},path_cost:{}>".format(self.game_state.row, self.game_state.col, self.game_state.gem_status, self.edge_action, self.path_cost)
 
     def __eq__(self, other):
         if not isinstance(other, Node):
@@ -163,7 +153,7 @@ def ucs(game_env):
     my_tree =  Tree(initial_state)
 
     solution = None
-    # steps = 0
+    steps = 0
 
     while not solution:# and steps<1000:
         # print(steps)
@@ -196,7 +186,7 @@ def ucs(game_env):
                     # Remove the previous_visit from the unexplored list
                     my_tree.unexplored.remove(previous_unexplored)
 
-        # steps = steps+1
+        steps = steps+1
 
     # print(my_tree.explored)
     # print("")
