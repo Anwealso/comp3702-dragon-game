@@ -1,7 +1,6 @@
 from game_env import GameEnv
 from game_state import GameState
 import time
-from queue import PriorityQueue
 
 import heapq
 
@@ -37,7 +36,6 @@ class Node():
         self.edge_action = edge_action # the action we took to get to this node
         # TODO: get rid of this field, since the path cost is stored in the priorityqueue item tuple anyways
         self.path_cost = path_cost # the cost of the full path to this node from the initial node
-        # self.edge_cost = edge_cost # TODO: remove edge_cost (since is recoverable from edge_action)
 
         self.id = "#{}#{}#".format(game_state.row, game_state.col)
         for item in game_state.gem_status:
@@ -50,14 +48,14 @@ class Node():
 
         return "<id:{},parent_id:{},row:{},col:{},gem_status:{},edge_action:{},path_cost:{}>".format(self.id, parent_id, self.game_state.row, self.game_state.col, self.game_state.gem_status, self.edge_action, self.path_cost)
 
-    # def __eq__(self, other):
-    #     if not isinstance(other, Node):
-    #         return False
-    #     return self.game_state == other.game_state and self.path_cost == other.path_cost
+    def __eq__(self, other):
+        if not isinstance(other, Node):
+            return False
+        return self.game_state == other.game_state# and self.path_cost == other.path_cost
 
     def __hash__(self):
         # TODO: Check if putting self.parent in the hash function is bad/slow
-        return hash((self.game_state, self.path_cost))
+        return hash(self.game_state)
 
     def __lt__(self, other):
         return self.path_cost < other.path_cost
@@ -72,7 +70,7 @@ class Node():
         #     successors: a list of nodes it is possible to visit from the 
         #         current node
 
-        # Pt1. ge the list of possible actions from this position
+        # Pt1. get the list of possible actions from this position
         actions = ['wl', 'wr', 'j', 'gl1', 'gl2', 'gl3', 'gr1', 'gr2', 'gr3', 'd1', 'd2', 'd3']
 
         # Pt2. Check if those actions are legal
@@ -96,102 +94,15 @@ class Tree():
     def __init__(self, root_state):
         self.root = Node(root_state, '', 0)
         self.explored = set()
-        self.unexplored = PriorityQueue() # <-- TODO: Swap this out to a PriorityQueue
-        # PriorityQueue entries are typically tuples of the form:  (priority number, data).
-        # Entries can be added with put(), or retrieved with get()
-        self.unexplored.put((0, self.root))
-        # print((0, self.root))            
+        self.unexplored = []
+        self.unexplored.append(self.root)
+        heapq.heapify(self.unexplored)
 
     def show_num_nodes(self):
         num_explored = len(self.explored)
-        num_unexplored = self.unexplored.qsize()
+        num_unexplored = len(self.unexplored)
         print('[[ Tree Size:' + str(num_explored+num_unexplored), '(Unexplored:' + str(num_unexplored), ', Explored:' + str(num_explored)+") ]]")
-
-    def get_matching_node(self, current_node):
-        """ 
-        Checks whether the tree already contains a node with the same gamestate, and returns it if there is.
-
-        Returns:
-            the matching node -  if there is a node with same game_state
-            False -  if there are no matches
-        """
-        # TODO: Definitely gonna need to optimise this thicc boi function
-        for explored_node in self.explored:
-            # XXX this should simply check the hashes - i.e. the game_states of the nodes
-            if current_node.game_state == explored_node.game_state:
-                # This node has the same game_state as our current node, so return True
-                return explored_node
-        # for unexplored_node in self.unexplored:
-        #     # XXX this should simply check the hashes - i.e. the game_states of the nodes
-        #     if current_node.game_state == unexplored_node.game_state:
-        #         # This node has the same game_state as our current node, so return True
-        #         return unexplored_node        
-        
-        # If we get to here without returning True, then we have gone through the whole list of nodes without finding any with a matching game_state, so return False
-        return None
-
-    def explore(self, game_env):
-        # Get the next node to explore
-        # TODO: Implement PriorityQueue, so that the queue is sorted by lowest cost first
-        try: (priority_number, current_node) = self.unexplored.get()
-        except IndexError:
-            # If we get here, then the tree has explored all possible nodes and found no solution, so raise an error?
-            # print("REACHED END OF UNEXPLORED LIST WITHOUT SOLUTION")
-            # print("UH-OH SEARCH PROBLEM IS UNSOLVABLE :(, Raising RuntimeError...")
-            raise RuntimeError
-        # Move that node to the explored list
-        self.explored.add(current_node)
-
-        # Get all of the new nodes that expand out from the current node
-        successors = current_node.get_successors(game_env)
-# ---------------------------------------------------------------------------- #
-        # TODO: Look into modifying this loop to reduce compute, since it looks kinda beefy
-        # Check if successors contains any states we have visited before
-        for successor in successors:
-            # Check if this successor solves the search problem (all gems + exit)
-            if game_env.is_solved(successor.game_state):
-                # Add it to the unexplored list (since it is a fringe node)
-                self.unexplored.put((successor.path_cost, successor))
-                # Return this solution node
-                return successor
-
-            # If we have visited this state before, check if this current path is less costly than the previous lowest cost path to this state
-            # print(68)
-            # print(successor.path_cost)            
-            # print(successor)            
-            # print(self.unexplored)            
-            self.unexplored.put((successor.path_cost, successor))
-            # print(69)
-
-            # TODO: Maybe we just say fuck it and just sacrifice memory to reduce compute and 
-            # just slap all new nodes into the unexplored list
-
-            # TODO: Oh shit - this function call is actually going to use tons of compute, since it checks through "for node in all_nodes". Definitely going to need to optimise this one
-            previous_visit = self.get_matching_node(successor)
-            if not previous_visit:
-                # If we either haven't visited this node before, add it to the unexplored list
-                self.unexplored.put((successor.path_cost, successor))
-
-            elif successor.path_cost < previous_visit.path_cost:
-                # Also if we have visited before but this new path is less costly than the last path, add it to the unexplored list, and also remove the previous_visit from the explored nodes list
-                # Append the new visit
-                self.unexplored.put((successor.path_cost, successor))
-                # Remove the old visit
-                # TODO: Do we even need to actually remove this node (Renee said) - will it ever be visited?
-                # Also apparently this remove operation will be linear time
-                try: self.unexplored.remove(previous_visit)
-                except:
-                    pass
-                # XXX: Got rid of the below because fuck it we'll just leave the unoptimal nodes in the explored list
-                # try: 
-                #     # TODO: check if this is allowable - i though somewhere said sets couldnt be removed from
-                #     self.unexplored.remove(previous_visit)
-                # except (ValueError, KeyError):
-                #     self.explored.remove(previous_visit)                    
-
-            # Else, don't add this node to the unexplored list - it will not be added to the tree for further exploration
-
-        return None
+        # print('[[ Tree Size: ? (Unexplored: ?, Explored:' + str(num_explored)+") ]]")
 
     def get_path(self, node):
         """
@@ -208,19 +119,22 @@ class Tree():
             # print("My edge action: {}. Looking up parent ...".format(node.edge_action))
             path = self.get_path(node.parent) + [node.edge_action]
             return path
+    
+    def get_matching_node(self, current_node):
+        """ 
+        Checks whether the tree already contains a node with the same gamestate, and returns it if there is.
 
-    # def get_path_cost(self, node):
-    #     """
-    #     Gets the cost of the full path to node from the initial starting point
-        
-    #     Works by using the code we already wrote for get_path
-        
-    #     """
-    #     path = self.get_path(node)
-    #     total_cost = 0
-    #     for action in path:
-    #         total_cost = total_cost + ACTION_COST[action]
-    #     return total_cost
+        Returns:
+            the matching node -  if there is a node with same game_state
+            None -  if there are no matches
+        """
+        # for explored_node in self.explored:
+        #     if current_node.game_state == explored_node.game_state:
+        #         return explored_node  
+        for unexplored_node in self.unexplored:
+            if current_node.game_state == unexplored_node.game_state:
+                return unexplored_node   
+        return None
 
 # ---------------------------------------------------------------------------- #
 #                               HELPER FUNCTIONS                               #
@@ -240,9 +154,7 @@ class Tree():
 # Returns:
 #     actions: a list of moves, e.g. ['wr', 'j', 'gl2']
 def ucs(game_env):
-    # print("########################")
-    # Do stuff
-    # print("Running ucs algorithm...")
+    print("Running ucs algorithm...")
     start_time = time.time()
 
     # Read the input testcase file
@@ -250,14 +162,54 @@ def ucs(game_env):
     # Init the tree data structure
     my_tree =  Tree(initial_state)
 
-    # Pop the first element from the unexplored queue and explore it
+    solution = None
+    # steps = 0
 
-    running = True
-    while running:
-        solution = my_tree.explore(game_env)
-        if solution != None:
-            running = False
-        
+    while not solution:# and steps<1000:
+        # print(steps)
+        # Get the next node to explore
+        current_node = heapq.heappop(my_tree.unexplored)
+        # Move that node to the explored list
+        my_tree.explored.add(current_node)
+        # print(current_node)
+
+        # Get all of the new nodes that expand out from the current node
+        successors = current_node.get_successors(game_env)
+        for successor in successors:
+            # print(successor)
+            # Check if this node solves the search problem
+            if game_env.is_solved(successor.game_state):
+                print("Yay, we found a solution!!!")
+                solution = successor
+                break
+
+            # If the state is previously explored, can this node immediately
+            if successor not in my_tree.explored:
+                # If the state is NOT previously explored, only add this new path if it has a lower cost than the existing path
+                previous_unexplored = my_tree.get_matching_node(successor)
+                if not previous_unexplored:
+                    # Add it to the unexplored list (since it is a fringe node)
+                    heapq.heappush(my_tree.unexplored, successor)
+                elif successor.path_cost < previous_unexplored.path_cost:
+                    # Add this new path to the unexplored list (since it is a fringe node)
+                    heapq.heappush(my_tree.unexplored, successor)
+                    # Remove the previous_visit from the unexplored list
+                    my_tree.unexplored.remove(previous_unexplored)
+
+        # steps = steps+1
+
+    # print(my_tree.explored)
+    # print("")
+    # print(my_tree.unexplored)
+
+    if not solution:
+        print("No solution was found.")
+        # If this error raises, then it means no solution was found
+        raise RuntimeError
+
+    # If we found a solution
+    solution_path = my_tree.get_path(solution)
+
     # If we get here than we have successfully found a solution to the problem (not necessarily optimal)
     # print("YAY, A SOLUTION IS FOUND!")
 
@@ -276,12 +228,10 @@ def ucs(game_env):
     # print("COST: {}".format(my_tree.get_path_cost(solution)))
 
     my_tree.show_num_nodes()
-
     print("[[ Execution Time: {} Second(s) ]]".format(round((time.time()-start_time), 4)))
 
-    # print("########################")
     # Return the final list of actions
-    return my_tree.get_path(solution)
+    return solution_path
 
 if __name__ == '__main__':
     # Do stuff
