@@ -4,7 +4,8 @@ import os
 from game_env import GameEnv
 from game_state import GameState
 
-from ucs import ucs
+# TODO: change this back to original ucs file before submission
+from ucs_v5 import ucs
 from a_star import a_star
 
 """

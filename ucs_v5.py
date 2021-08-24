@@ -1,7 +1,6 @@
 from game_env import GameEnv
 from game_state import GameState
 import time
-from queue import PriorityQueue
 
 import heapq
 
@@ -49,14 +48,14 @@ class Node():
 
         return "<id:{},parent_id:{},row:{},col:{},gem_status:{},edge_action:{},path_cost:{}>".format(self.id, parent_id, self.game_state.row, self.game_state.col, self.game_state.gem_status, self.edge_action, self.path_cost)
 
-    # def __eq__(self, other):
-    #     if not isinstance(other, Node):
-    #         return False
-    #     return self.game_state == other.game_state and self.path_cost == other.path_cost
+    def __eq__(self, other):
+        if not isinstance(other, Node):
+            return False
+        return self.game_state == other.game_state# and self.path_cost == other.path_cost
 
     def __hash__(self):
         # TODO: Check if putting self.parent in the hash function is bad/slow
-        return hash((self.game_state, self.path_cost))
+        return hash(self.game_state)
 
     def __lt__(self, other):
         return self.path_cost < other.path_cost
@@ -71,7 +70,7 @@ class Node():
         #     successors: a list of nodes it is possible to visit from the 
         #         current node
 
-        # Pt1. ge the list of possible actions from this position
+        # Pt1. get the list of possible actions from this position
         actions = ['wl', 'wr', 'j', 'gl1', 'gl2', 'gl3', 'gr1', 'gr2', 'gr3', 'd1', 'd2', 'd3']
 
         # Pt2. Check if those actions are legal
@@ -101,9 +100,9 @@ class Tree():
 
     def show_num_nodes(self):
         num_explored = len(self.explored)
-        # num_unexplored = -1
-        # print('[[ Tree Size:' + str(num_explored+num_unexplored), '(Unexplored:' + str(num_unexplored), ', Explored:' + str(num_explored)+") ]]")
-        print('[[ Tree Size: ? (Unexplored: ?, Explored:' + str(num_explored)+") ]]")
+        num_unexplored = len(self.unexplored)
+        print('[[ Tree Size:' + str(num_explored+num_unexplored), '(Unexplored:' + str(num_unexplored), ', Explored:' + str(num_explored)+") ]]")
+        # print('[[ Tree Size: ? (Unexplored: ?, Explored:' + str(num_explored)+") ]]")
 
     def get_path(self, node):
         """
@@ -120,6 +119,22 @@ class Tree():
             # print("My edge action: {}. Looking up parent ...".format(node.edge_action))
             path = self.get_path(node.parent) + [node.edge_action]
             return path
+    
+    def get_matching_node(self, current_node):
+        """ 
+        Checks whether the tree already contains a node with the same gamestate, and returns it if there is.
+
+        Returns:
+            the matching node -  if there is a node with same game_state
+            None -  if there are no matches
+        """
+        # for explored_node in self.explored:
+        #     if current_node.game_state == explored_node.game_state:
+        #         return explored_node  
+        for unexplored_node in self.unexplored:
+            if current_node.game_state == unexplored_node.game_state:
+                return unexplored_node   
+        return None
 
 # ---------------------------------------------------------------------------- #
 #                               HELPER FUNCTIONS                               #
@@ -148,15 +163,15 @@ def ucs(game_env):
     my_tree =  Tree(initial_state)
 
     solution = None
-    steps = 0
+    # steps = 0
 
     while not solution:# and steps<1000:
-        print(steps)
+        # print(steps)
         # Get the next node to explore
         current_node = heapq.heappop(my_tree.unexplored)
         # Move that node to the explored list
         my_tree.explored.add(current_node)
-        print(current_node)
+        # print(current_node)
 
         # Get all of the new nodes that expand out from the current node
         successors = current_node.get_successors(game_env)
@@ -166,16 +181,26 @@ def ucs(game_env):
             if game_env.is_solved(successor.game_state):
                 print("Yay, we found a solution!!!")
                 solution = successor
+                break
 
+            # If the state is previously explored, can this node immediately
             if successor not in my_tree.explored:
-                # Also need to check to see if there is another path to this state in the unexplored list
-                # If there is another path, only add this new path if it has a lower cost than the existing path
+                # If the state is NOT previously explored, only add this new path if it has a lower cost than the existing path
+                previous_unexplored = my_tree.get_matching_node(successor)
+                if not previous_unexplored:
+                    # Add it to the unexplored list (since it is a fringe node)
+                    heapq.heappush(my_tree.unexplored, successor)
+                elif successor.path_cost < previous_unexplored.path_cost:
+                    # Add this new path to the unexplored list (since it is a fringe node)
+                    heapq.heappush(my_tree.unexplored, successor)
+                    # Remove the previous_visit from the unexplored list
+                    my_tree.unexplored.remove(previous_unexplored)
 
-                # Add it to the unexplored list (since it is a fringe node)
-                heapq.heappush(my_tree.unexplored, successor)
-            
+        # steps = steps+1
 
-        steps = steps+1
+    # print(my_tree.explored)
+    # print("")
+    # print(my_tree.unexplored)
 
     if not solution:
         print("No solution was found.")

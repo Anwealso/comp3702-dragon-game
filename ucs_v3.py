@@ -147,43 +147,32 @@ def ucs(game_env):
     # Init the tree data structure
     my_tree =  Tree(initial_state)
 
-    solution = None
-    steps = 0
-
-    while not solution:# and steps<1000:
-        print(steps)
+    while my_tree.unexplored:
         # Get the next node to explore
         current_node = heapq.heappop(my_tree.unexplored)
-        # Move that node to the explored list
-        my_tree.explored.add(current_node)
-        print(current_node)
+        # Check if this node solves the search problem
+        if game_env.is_solved(current_node.game_state):
+            print("Yay, we found a solution!!!")
+            break;
+        if current_node not in my_tree.explored:
+            # Move that node to the explored list
+            my_tree.explored.add(current_node)
 
         # Get all of the new nodes that expand out from the current node
         successors = current_node.get_successors(game_env)
         for successor in successors:
-            # print(successor)
-            # Check if this node solves the search problem
-            if game_env.is_solved(successor.game_state):
-                print("Yay, we found a solution!!!")
-                solution = successor
-
+            # print(successor)            
             if successor not in my_tree.explored:
-                # Also need to check to see if there is another path to this state in the unexplored list
-                # If there is another path, only add this new path if it has a lower cost than the existing path
-
                 # Add it to the unexplored list (since it is a fringe node)
                 heapq.heappush(my_tree.unexplored, successor)
-            
 
-        steps = steps+1
-
-    if not solution:
+    if not my_tree.unexplored:
         print("No solution was found.")
         # If this error raises, then it means no solution was found
         raise RuntimeError
 
     # If we found a solution
-    solution_path = my_tree.get_path(solution)
+    solution_path = my_tree.get_path(current_node)
 
     # If we get here than we have successfully found a solution to the problem (not necessarily optimal)
     # print("YAY, A SOLUTION IS FOUND!")
