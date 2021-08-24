@@ -21,9 +21,9 @@ COMP3702 2021 Assignment 1 Code
 #                         CONSTANTS & GLOBAL VARIABLES                         #
 # ---------------------------------------------------------------------------- #
 
-# ACTION_COST = {'wl':1.0, 'wr':1.0, 'j':2.0, 
-#         'gl1':0.7, 'gl2':1.0, 'gl3':1.2, 'gr1':0.7, 'gr2':1.0, 'gr3':1.2, 
-#         'd1':0.3, 'd2':0.4, 'd3':0.5}
+ACTION_COST = {'wl':1.0, 'wr':1.0, 'j':2.0, 
+        'gl1':0.7, 'gl2':1.0, 'gl3':1.2, 'gr1':0.7, 'gr2':1.0, 'gr3':1.2, 
+        'd1':0.3, 'd2':0.4, 'd3':0.5}
 
 # ---------------------------------------------------------------------------- #
 #                                    CLASSES                                   #
@@ -51,6 +51,7 @@ class Node():
         return self.path_cost < other.path_cost
 
     def get_successors(self, game_env):
+        # TODO: Maybe look at optimising this function???
         # Gets the possible successor nodes from this node.
         # Tries each possible move from current position. For each of the 
         # possible moves, check if the move is legal, and if it is, get the 
@@ -74,7 +75,7 @@ class Node():
         # Pt3. convert successor states to successor nodes
         successor_nodes = []
         for (action, state) in successor_states.items():
-            successor_nodes.append( Node(state, action, self.path_cost+game_env.ACTION_COST[action], parent=self) )
+            successor_nodes.append( Node(state, action, self.path_cost+ACTION_COST[action], parent=self) )
 
         return successor_nodes
         
@@ -87,7 +88,6 @@ def show_num_nodes(unexplored, explored):
     num_explored = len(explored)
     num_unexplored = len(unexplored)
     print('[[ Tree Size:' + str(num_explored+num_unexplored), '(Unexplored:' + str(num_unexplored), ', Explored:' + str(num_explored)+") ]]")
-    # print('[[ Tree Size: ? (Unexplored: ?, Explored:' + str(num_explored)+") ]]")
 
 def get_path(node):
     """
@@ -98,10 +98,8 @@ def get_path(node):
     """
     # Check to see if i have no parent (i.e. im the root node) (base case) 
     if node.parent == None:
-        # print("I have no parent")
         return []
     else:
-        # print("My edge action: {}. Looking up parent ...".format(node.edge_action))
         path = get_path(node.parent) + [node.edge_action]
         return path
 
@@ -135,7 +133,7 @@ def get_matching_node(unexplored, current_node):
 # Returns:
 #     actions: a list of moves, e.g. ['wr', 'j', 'gl2']
 def ucs(game_env):
-    print("Running ucs algorithm...")
+    print("[[ Running ucs algorithm... ]]")
     start_time = time.time()
 
     # Read the input testcase file
@@ -149,23 +147,19 @@ def ucs(game_env):
     heapq.heapify(unexplored)
 
     solution = None
-    steps = 0
 
-    while not solution:# and steps<1000:
-        # print(steps)
+    while not solution:
         # Get the next node to explore
         current_node = heapq.heappop(unexplored)
         # Move that node to the explored list
         explored.add(current_node)
-        # print(current_node)
 
         # Get all of the new nodes that expand out from the current node
         successors = current_node.get_successors(game_env)
         for successor in successors:
-            # print(successor)
             # Check if this node solves the search problem
             if game_env.is_solved(successor.game_state):
-                print("Yay, we found a solution!!!")
+                # Yay, we found a solution!!!
                 solution = successor
                 break
 
@@ -182,10 +176,7 @@ def ucs(game_env):
                     # Remove the previous_visit from the unexplored list
                     unexplored.remove(previous_unexplored)
 
-        steps = steps+1
-
     if not solution:
-        print("No solution was found.")
         # If this error raises, then it means no solution was found
         raise RuntimeError
 
