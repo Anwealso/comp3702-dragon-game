@@ -173,7 +173,7 @@ def ucs(game_env):
     solution_path = get_path(solution)
 
     show_num_nodes(unexplored, explored)
-    print("[[ Execution Time: {} Second(s) ]]".format(round((time.time()-start_time), 4)))
+    print("[[ My Execution Time: {} Second(s) ]]".format(round((time.time()-start_time), 4)))
 
     # Return the final list of actions
     return solution_path
