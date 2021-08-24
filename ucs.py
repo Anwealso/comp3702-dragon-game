@@ -60,18 +60,14 @@ class Node():
         #     successors: a list of nodes it is possible to visit from the 
         #         current node
 
-        # Pt1. Check which actions are legal
-        successor_states = {}
-        for action in game_env.ACTIONS:
-            # TODO: Maybe we can find a more efficient way of testing whether this move is legal or not?
-            (legal, next_state) = game_env.perform_action(self.game_state, action)
-            if legal:
-                successor_states[action] = next_state
-        
-        # Pt3. convert successor states to successor nodes
         successor_nodes = []
-        for (action, state) in successor_states.items():
-            successor_nodes.append( Node(state, action, self.path_cost+game_env.ACTION_COST[action], parent=self) )
+
+        for action in game_env.ACTIONS:
+            # TODO: Can we make this more efficient?
+            (legal, next_state) = game_env.perform_action(self.game_state, action) # Test whether this move is legal or not
+            if legal:
+                # Convert successor states to successor nodes
+                successor_nodes.append( Node(next_state, action, self.path_cost+game_env.ACTION_COST[action], parent=self) )
 
         return successor_nodes
         
