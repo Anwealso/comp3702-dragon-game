@@ -44,7 +44,6 @@ class Node():
         return self.game_state == other.game_state# and self.path_cost == other.path_cost
 
     def __hash__(self):
-        # TODO: Check if putting self.parent in the hash function is bad/slow
         return hash(self.game_state)
 
     def __lt__(self, other):
@@ -61,12 +60,9 @@ class Node():
         #     successors: a list of nodes it is possible to visit from the 
         #         current node
 
-        # Pt1. get the list of possible actions from this position
-        actions = ['wl', 'wr', 'j', 'gl1', 'gl2', 'gl3', 'gr1', 'gr2', 'gr3', 'd1', 'd2', 'd3']
-
-        # Pt2. Check if those actions are legal
+        # Pt1. Check which actions are legal
         successor_states = {}
-        for action in actions:
+        for action in game_env.ACTIONS:
             # TODO: Maybe we can find a more efficient way of testing whether this move is legal or not?
             (legal, next_state) = game_env.perform_action(self.game_state, action)
             if legal:
@@ -75,7 +71,7 @@ class Node():
         # Pt3. convert successor states to successor nodes
         successor_nodes = []
         for (action, state) in successor_states.items():
-            successor_nodes.append( Node(state, action, self.path_cost+ACTION_COST[action], parent=self) )
+            successor_nodes.append( Node(state, action, self.path_cost+game_env.ACTION_COST[action], parent=self) )
 
         return successor_nodes
         
@@ -116,9 +112,6 @@ def get_matching_node(unexplored, current_node):
         if current_node.game_state == unexplored_node.game_state:
             return unexplored_node   
     return None
-
-# TODO: Look at maybe whether the encapsulation of this tree object is making things run much slower    
-
 
 # ---------------------------------------------------------------------------- #
 #                                 MAIN FUNCTION                                #
