@@ -93,8 +93,10 @@ class Node():
         #         current node
         successor_nodes = []
 
+        actions = ACTIONS
+
         # # Get the possible actions for the tile type we are standing on
-        actions = POSSIBLE_ACTIONS[game_env.grid_data[self.game_state.row + 1][self.game_state.col]]
+        # actions = POSSIBLE_ACTIONS[game_env.grid_data[self.game_state.row + 1][self.game_state.col]]
 
         for action in actions:
             # TODO: Can we make this any more efficient?
@@ -169,21 +171,38 @@ def ucs(game_env):
     heapq.heapify(unexplored)
 
     solution = None
+    num_sols = 0
 
-    while not solution:
+    while True:
         # Get the next node to explore
-        current_node = heapq.heappop(unexplored)
+        try: current_node = heapq.heappop(unexplored)
+        except IndexError:
+            # If we hit this IndexError, we have exhausted the unexplored nodes
+            break
         # Move that node to the explored list
         explored.add(current_node)
 
         # Get all of the new nodes that expand out from the current node
         successors = current_node.get_successors(game_env)
         for successor in successors:
+            fucked = False
+
+            if (successor.edge_action=='gl3' or successor.edge_action=='gr3') and (successor.parent.edge_action=='j') and (successor.parent.parent.path_cost!=0):
+                print('F')
+                fucked = True
             # Check if this node solves the search problem
             if game_env.is_solved(successor.game_state):
                 # Yay, we found a solution!!!
-                solution = successor
-                break
+                num_sols = num_sols+1
+                # If it is more efficient than the last solution it replaces the old solution
+                print(successor)
+                print(get_path(successor))
+                if not solution or (successor.path_cost < solution.path_cost):
+                    solution = successor
+                    print("^ is the new best solution")
+                # But keep the loop running ...
+
+                # j, gl3, wl, wl, wl, j, j, j, j, wr, wr, wr, wr, gr3, wr, wl, wl, d1, gl3, gl2
 
             # If the state is previously explored, can this node immediately
             if successor not in explored:
@@ -192,14 +211,24 @@ def ucs(game_env):
                 if not previous_unexplored:
                     # Add it to the unexplored list (since it is a fringe node)
                     heapq.heappush(unexplored, successor)
+                    if fucked:
+                        # If we get here we somehow thoughed a fucked j, gx3 path was actually a better path to a certain state
+                        print(successor)
+                        print("Added a fucked j, gx3 path. Reason: UNEXPLORED")
                 elif successor.path_cost < previous_unexplored.path_cost:
                     # Add this new path to the unexplored list (since it is a fringe node)
                     heapq.heappush(unexplored, successor)
                     # Remove the previous_visit from the unexplored list
                     unexplored.remove(previous_unexplored)
+                    if fucked:
+                        # If we get here we somehow thoughed a fucked j, gx3 path was actually a better path to a certain state
+                        print(successor)
+                        print("Added a fucked j, gx3 path. Reason: BETTER PATH")
+    print("Number of Solutions Found: {}".format(num_sols))
 
     if not solution:
         # If this error raises, then it means no solution was found
+        print("Error: Unexplored is empty, but no solution found")
         raise RuntimeError
 
     # If we found a solution, get its path
