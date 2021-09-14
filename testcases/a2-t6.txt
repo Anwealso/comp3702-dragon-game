@@ -1,0 +1,39 @@
+# n_rows, n_cols
+18, 18
+# offline time limit
+15.0
+# online time limit
+5.0
+# reward target
+-72.3
+# glide probabilities
+0.2, 0.6, 0.2
+# super jump probabilities
+0.2, 0.3, 0.3, 0.2
+# super charge probabilities
+0.2, 0.3, 0.3, 0.2
+# ladder fall probability
+0.5
+# collision penalty
+1.0
+# game over penalty
+500.0
+# grid data
+XXXXXXXXXXXXXXXXXX
+XXX            XXX
+X  P             X
+X =X==========X= X
+X =X          X= X
+X =X          X= X
+X =X**  **  **X= X
+XG=            = X
+X =X==========X= X
+X =X          X= X
+X =X          X= X
+X =X**  **  **X= X
+X =            =GX
+X =X==========X= X
+X =X          X= X
+X =X          X= X
+XG=X**********X=EX
+XXXXXXXXXXXXXXXXXX

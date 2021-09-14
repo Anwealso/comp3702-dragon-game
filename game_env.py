@@ -1,3 +1,4 @@
+import random
 from game_state import GameState
 
 """
@@ -6,9 +7,9 @@ game_env.py
 This file contains a class representing an Untitled Dragon Game environment. You should make use of this class in your
 solver.
 
-COMP3702 2021 Assignment 1 Support Code
+COMP3702 2021 Assignment 2 Support Code
 
-Last updated by njc 04/08/21
+Last updated by njc 02/09/21
 """
 
 
@@ -30,10 +31,16 @@ class GameEnv:
     LADDER_TILE = '='
     AIR_TILE = ' '
     LAVA_TILE = '*'
+    SUPER_JUMP_TILE = 'J'
+    SUPER_CHARGE_TILE = 'C'
     GEM_TILE = 'G'
     EXIT_TILE = 'E'
     PLAYER_TILE = 'P'
-    VALID_TILES = {SOLID_TILE, LADDER_TILE, AIR_TILE, LAVA_TILE, GEM_TILE, EXIT_TILE, PLAYER_TILE}
+    VALID_TILES = {SOLID_TILE, LADDER_TILE, AIR_TILE, LAVA_TILE, SUPER_JUMP_TILE, SUPER_CHARGE_TILE, GEM_TILE,
+                   EXIT_TILE, PLAYER_TILE}
+    WALK_JUMP_ALLOWED_TILES = {SOLID_TILE, LADDER_TILE, SUPER_JUMP_TILE, SUPER_CHARGE_TILE}
+    GLIDE_DROP_ALLOWED_TILES = {AIR_TILE, LADDER_TILE, LAVA_TILE}
+    COLLISION_TILES = {SOLID_TILE, SUPER_JUMP_TILE, SUPER_CHARGE_TILE}
 
     # action symbols (i.e. output file symbols)
     WALK_LEFT = 'wl'
@@ -50,13 +57,11 @@ class GameEnv:
     DROP_3 = 'd3'
     ACTIONS = {WALK_LEFT, WALK_RIGHT, JUMP, GLIDE_LEFT_1, GLIDE_LEFT_2, GLIDE_LEFT_3,
                GLIDE_RIGHT_1, GLIDE_RIGHT_2, GLIDE_RIGHT_3, DROP_1, DROP_2, DROP_3}
+    WALK_ACTIONS = {WALK_LEFT, WALK_RIGHT}
+    GLIDE_ACTIONS = {GLIDE_LEFT_1, GLIDE_LEFT_2, GLIDE_LEFT_3, GLIDE_RIGHT_1, GLIDE_RIGHT_2, GLIDE_RIGHT_3}
+    DROP_ACTIONS = {DROP_1, DROP_2, DROP_3}
     ACTION_COST = {WALK_LEFT: 1.0, WALK_RIGHT: 1.0, JUMP: 2.0, GLIDE_LEFT_1: 0.7, GLIDE_LEFT_2: 1.0, GLIDE_LEFT_3: 1.2,
                    GLIDE_RIGHT_1: 0.7, GLIDE_RIGHT_2: 1.0, GLIDE_RIGHT_3: 1.2, DROP_1: 0.3, DROP_2: 0.4, DROP_3: 0.5}
-
-    # perform action return statuses
-    SUCCESS = 0
-    COLLISION = 1
-    GAME_OVER = 2
 
     def __init__(self, filename):
         """
@@ -79,14 +84,54 @@ class GameEnv:
                     assert False, f'!!! Invalid input file - n_rows and n_cols (line {i}) !!!'
             elif i == 1:
                 try:
-                    self.time_limit = float(line.strip())
+                    self.offline_time = float(line.strip())
                 except ValueError:
-                    assert False, f'!!! Invalid input file - time limit (line {i}) !!!'
+                    assert False, f'!!! Invalid input file - offline time (line {i}) !!!'
             elif i == 2:
                 try:
-                    self.cost_tgt = float(line.strip())
+                    self.online_time = float(line.strip())
                 except ValueError:
-                    assert False, f'!!! Invalid input file - cost target (line {i}) !!!'
+                    assert False, f'!!! Invalid input file - online time (line {i}) !!!'
+            elif i == 3:
+                try:
+                    self.reward_tgt = float(line.strip())
+                except ValueError:
+                    assert False, f'!!! Invalid input file - reward target (line {i}) !!!'
+            elif i == 4:
+                try:
+                    probs = [float(x) for x in line.strip().split(',')]
+                    self.glide1_probs = {0: probs[0], 1: probs[1], 2: probs[2]}
+                    self.glide2_probs = {1: probs[0], 2: probs[1], 3: probs[2]}
+                    self.glide3_probs = {2: probs[0], 3: probs[1], 4: probs[2]}
+                except ValueError:
+                    assert False, f'!!! Invalid input file - glide probabilities (line {i}) !!!'
+            elif i == 5:
+                try:
+                    probs = [float(x) for x in line.strip().split(',')]
+                    self.super_jump_probs = {2: probs[0], 3: probs[1], 4: probs[2], 5: probs[3]}
+                except ValueError:
+                    assert False, f'!!! Invalid input file - super jump probabilities (line {i}) !!!'
+            elif i == 6:
+                try:
+                    probs = [float(x) for x in line.strip().split(',')]
+                    self.super_charge_probs = {2: probs[0], 3: probs[1], 4: probs[2], 5: probs[3]}
+                except ValueError:
+                    assert False, f'!!! Invalid input file - super charge probabilities (line {i}) !!!'
+            elif i == 7:
+                try:
+                    self.ladder_fall_prob = float(line.strip())
+                except ValueError:
+                    assert False, f'!!! Invalid input file - ladder fall probability (line {i}) !!!'
+            elif i == 8:
+                try:
+                    self.collision_penalty = float(line.strip())
+                except ValueError:
+                    assert False, f'!!! Invalid input file - collision penalty (line {i}) !!!'
+            elif i == 9:
+                try:
+                    self.game_over_penalty = float(line.strip())
+                except ValueError:
+                    assert False, f'!!! Invalid input file - game over penalty (line {i}) !!!'
             elif len(line.strip()) > 0:
                 grid_data.append(list(line.strip()))
                 assert len(grid_data[-1]) == self.n_cols,\
@@ -134,113 +179,262 @@ class GameEnv:
         """
         return GameState(self.init_row, self.init_col, tuple(0 for g in self.gem_positions))
 
-    def perform_action(self, state, action):
+    def __check_collision_or_terminal(self, row, col, reward, row_move_dir, col_move_dir):
+        terminal = False
+        collision = False
+        # check for collision condition
+        if (not 0 <= row < self.n_rows) or (not 0 <= col < self.n_cols) or \
+                self.grid_data[row][col] in self.COLLISION_TILES:
+            reward -= self.collision_penalty
+            row -= row_move_dir     # bounce back to previous position
+            col -= col_move_dir     # bounce back to previous position
+            collision = True
+        # check for game over condition
+        elif self.grid_data[row][col] == self.LAVA_TILE:
+            reward -= self.game_over_penalty
+            terminal = True
+
+        return row, col, reward, collision, terminal
+
+    def __check_collision_or_terminal_glide(self, row, col, reward, row_move_dir, col_move_dir):
+        # variant for checking glide actions - checks row above as well as current row
+        terminal = False
+        collision = False
+        # check for collision condition
+        if (not 0 <= row < self.n_rows) or (not 0 <= col < self.n_cols) or \
+                self.grid_data[row][col] in self.COLLISION_TILES or \
+                self.grid_data[row - 1][col] in self.COLLISION_TILES:
+            reward -= self.collision_penalty
+            row -= row_move_dir     # bounce back to previous position
+            col -= col_move_dir     # bounce back to previous position
+            collision = True
+        # check for game over condition
+        elif self.grid_data[row][col] == self.LAVA_TILE or self.grid_data[row - 1][col] == self.LAVA_TILE:
+            reward -= self.game_over_penalty
+            terminal = True
+
+        return row, col, reward, collision, terminal
+
+    def __check_gem_collected_or_goal_reached(self, row, col, gem_status):
+        is_terminal = False
+        # check if a gem is collected (only do this for final position of charge)
+        if (row, col) in self.gem_positions and \
+                gem_status[self.gem_positions.index((row, col))] == 0:
+            gem_status = list(gem_status)
+            gem_status[self.gem_positions.index((row, col))] = 1
+            gem_status = tuple(gem_status)
+        # check for goal reached condition (only do this for final position of charge)
+        elif row == self.exit_row and col == self.exit_col and \
+                all(gs == 1 for gs in gem_status):
+            is_terminal = True
+        return gem_status, is_terminal
+
+    @staticmethod
+    def __sample_move_dist(probs):
+        rn = random.random()
+        cumulative_prob = 0
+        move_dist = 0
+        for k in probs.keys():
+            cumulative_prob += probs[k]
+            if rn < cumulative_prob:
+                move_dist = k
+                break
+        return move_dist
+
+    def perform_action(self, state, action, seed=None):
         """
-        Perform the given action on the given state, and return whether the action was successful (i.e. valid and
-        collision free) and the resulting new state.
+        Perform the given action on the given state, sample an outcome, and return whether the action was valid, and if
+        so, the received reward, the resulting new state and whether the new state is terminal.
         :param state: current GameState
         :param action: an element of self.ACTIONS
-        :return: (successful [True/False], next_state [GameState])
+        :param seed: random number generator seed (for consistent outcomes between runs)
+        :return: (action_is_valid [True/False], received_reward [float], next_state [GameState],
+                    state_is_terminal [True/False])
         """
-        # check walkable ground prerequisite if applicable
-        if action in (self.WALK_LEFT, self.WALK_RIGHT, self.JUMP) and \
-                self.grid_data[state.row + 1][state.col] not in (self.SOLID_TILE, self.LADDER_TILE):
-            # prerequisite not satisfied - on a walkable surface
-            return False, state.deepcopy()
+        reward = -1 * self.ACTION_COST[action]
 
-        # get coordinates for next state and clear zone states
-        clear_zone = []
+        # check if the given action is valid for the given state
+        if action in {self.WALK_LEFT, self.WALK_RIGHT, self.JUMP}:
+            # check walkable ground prerequisite if action is walk or jump
+            if self.grid_data[state.row + 1][state.col] not in self.WALK_JUMP_ALLOWED_TILES:
+                # prerequisite not satisfied
+                return False, None, None, None
+        else:
+            # check permeable ground prerequisite if action is glide or drop
+            if self.grid_data[state.row + 1][state.col] not in self.GLIDE_DROP_ALLOWED_TILES:
+                # prerequisite not satisfied
+                return False, None, None, None
 
-        if action == self.WALK_LEFT:
-            next_row, next_col = (state.row, state.col - 1)         # left 1
+        # handle each action type separately
+        if action in self.WALK_ACTIONS:
+            if self.grid_data[state.row + 1][state.col] == self.SUPER_CHARGE_TILE:
+                # sample a random move distance
+                random.seed(seed)
+                move_dist = self.__sample_move_dist(self.super_charge_probs)
 
-        elif action == self.WALK_RIGHT:
-            next_row, next_col = (state.row, state.col + 1)         # right 1
+                # set movement direction
+                if action == self.WALK_LEFT:
+                    move_dir = -1
+                else:
+                    move_dir = 1
+
+                next_row, next_col = state.row, state.col
+                next_gem_status = state.gem_status
+
+                # move up to the last adjoining supercharge tile
+                while self.grid_data[next_row + 1][next_col + move_dir] == self.SUPER_CHARGE_TILE:
+                    next_col += move_dir
+                    # check for collision or game over
+                    next_row, next_col, reward, collision, is_terminal = \
+                        self.__check_collision_or_terminal(next_row, next_col, reward,
+                                                           row_move_dir=0, col_move_dir=move_dir)
+                    if collision or is_terminal:
+                        break
+
+                # move sampled move distance beyond the last adjoining supercharge tile
+                for d in range(move_dist):
+                    next_col += move_dir
+                    # check for collision or game over
+                    next_row, next_col, reward, collision, is_terminal = \
+                        self.__check_collision_or_terminal(next_row, next_col, reward,
+                                                           row_move_dir=0, col_move_dir=move_dir)
+                    if collision or is_terminal:
+                        break
+
+                # check if a gem is collected or goal is reached (only do this for final position of charge)
+                next_gem_status, is_terminal = self.__check_gem_collected_or_goal_reached(next_row, next_col,
+                                                                                          next_gem_status)
+
+                return True, reward, GameState(next_row, next_col, next_gem_status), is_terminal
+            else:
+                # if on ladder, sample whether fall occurs
+                random.seed(seed)
+                if self.grid_data[state.row + 1][state.col] == self.LADDER_TILE and \
+                        self.grid_data[state.row + 2][state.col] not in self.COLLISION_TILES and \
+                        random.random() < self.ladder_fall_prob:
+                    next_row, next_col = state.row + 2, state.col
+                    row_move_dir = 1
+                    col_move_dir = 0
+                # not on ladder or no fall - set movement direction based on chosen action
+                elif action == self.WALK_LEFT:
+                    col_move_dir = -1
+                    row_move_dir = 0
+                    next_row, next_col = (state.row, state.col + col_move_dir)
+                else:
+                    col_move_dir = 1
+                    row_move_dir = 0
+                    next_row, next_col = (state.row, state.col + col_move_dir)
+                next_gem_status = state.gem_status
+                # check for collision or game over
+                next_row, next_col, reward, collision, is_terminal = \
+                    self.__check_collision_or_terminal(next_row, next_col, reward,
+                                                       row_move_dir=row_move_dir, col_move_dir=col_move_dir)
+                # check if a gem is collected or goal is reached
+                next_gem_status, is_terminal = self.__check_gem_collected_or_goal_reached(next_row, next_col,
+                                                                                          next_gem_status)
+
+                return True, reward, GameState(next_row, next_col, next_gem_status), is_terminal
 
         elif action == self.JUMP:
-            next_row, next_col = (state.row - 1, state.col)         # up 1
+            if self.grid_data[state.row + 1][state.col] == self.SUPER_JUMP_TILE:
+                # sample a random move distance
+                random.seed(seed)
+                move_dist = self.__sample_move_dist(self.super_jump_probs)
 
-        elif action == self.GLIDE_LEFT_1:
-            clear_zone.append((state.row, state.col - 1))           # left 1
-            clear_zone.append((state.row + 1, state.col))           # down 1
-            next_row, next_col = (state.row + 1, state.col - 1)     # left 1, down 1
+                next_row, next_col = state.row, state.col
+                next_gem_status = state.gem_status
 
-        elif action == self.GLIDE_LEFT_2:
-            clear_zone.append((state.row, state.col - 1))           # left 1
-            clear_zone.append((state.row, state.col - 2))           # left 2
-            clear_zone.append((state.row + 1, state.col))           # down 1
-            clear_zone.append((state.row + 1, state.col - 1))       # left 1, down 1
-            next_row, next_col = (state.row + 1, state.col - 2)     # left 2, down 1
+                # move sampled distance upwards
+                for d in range(move_dist):
+                    next_row -= 1
+                    # check for collision or game over
+                    next_row, next_col, reward, collision, is_terminal = \
+                        self.__check_collision_or_terminal(next_row, next_col, reward, row_move_dir=-1, col_move_dir=0)
+                    if collision or is_terminal:
+                        break
 
-        elif action == self.GLIDE_LEFT_3:
-            clear_zone.append((state.row, state.col - 1))           # left 1
-            clear_zone.append((state.row, state.col - 2))           # left 2
-            clear_zone.append((state.row, state.col - 3))           # left 3
-            clear_zone.append((state.row + 1, state.col))           # down 1
-            clear_zone.append((state.row + 1, state.col - 1))       # left 1, down 1
-            clear_zone.append((state.row + 1, state.col - 2))       # left 2, down 1
-            next_row, next_col = (state.row + 1, state.col - 3)     # left 3, down 1
+                # check if a gem is collected or goal is reached (only do this for final position of charge)
+                next_gem_status, is_terminal = self.__check_gem_collected_or_goal_reached(next_row,
+                                                                                          next_col,
+                                                                                          next_gem_status)
 
-        elif action == self.GLIDE_RIGHT_1:
-            clear_zone.append((state.row, state.col + 1))           # right 1
-            clear_zone.append((state.row + 1, state.col))           # down 1
-            next_row, next_col = (state.row + 1, state.col + 1)     # right 1, down 1
+                return True, reward, GameState(next_row, next_col, next_gem_status), is_terminal
 
-        elif action == self.GLIDE_RIGHT_2:
-            clear_zone.append((state.row, state.col + 1))           # right 1
-            clear_zone.append((state.row, state.col + 2))           # right 2
-            clear_zone.append((state.row + 1, state.col))           # down 1
-            clear_zone.append((state.row + 1, state.col + 1))       # right 1, down 1
-            next_row, next_col = (state.row + 1, state.col + 2)     # right 2, down 1
+            else:
+                next_row, next_col = state.row - 1, state.col
+                next_gem_status = state.gem_status
+                # check for collision or game over
+                next_row, next_col, reward, collision, is_terminal = \
+                    self.__check_collision_or_terminal(next_row, next_col, reward, row_move_dir=-1, col_move_dir=0)
+                # check if a gem is collected or goal is reached
+                next_gem_status, is_terminal = self.__check_gem_collected_or_goal_reached(next_row,
+                                                                                          next_col,
+                                                                                          next_gem_status)
 
-        elif action == self.GLIDE_RIGHT_3:
-            clear_zone.append((state.row, state.col + 1))           # right 1
-            clear_zone.append((state.row, state.col + 2))           # right 2
-            clear_zone.append((state.row, state.col + 3))           # right 3
-            clear_zone.append((state.row + 1, state.col))           # down 1
-            clear_zone.append((state.row + 1, state.col + 1))       # right 1, down 1
-            clear_zone.append((state.row + 1, state.col + 2))       # right 2, down 1
-            next_row, next_col = (state.row + 1, state.col + 3)     # right 3, down 1
+                return True, reward, GameState(next_row, next_col, next_gem_status), is_terminal
 
-        elif action == self.DROP_1:
-            next_row, next_col = (state.row + 1, state.col)         # down 1
+        elif action in self.GLIDE_ACTIONS:
+            # select probabilities to sample move distance
+            if action in {self.GLIDE_LEFT_1, self.GLIDE_RIGHT_1}:
+                probs = self.glide1_probs
+            elif action in {self.GLIDE_LEFT_2, self.GLIDE_RIGHT_2}:
+                probs = self.glide2_probs
+            else:
+                probs = self.glide3_probs
+            # sample a random move distance
+            random.seed(seed)
+            move_dist = self.__sample_move_dist(probs)
 
-        elif action == self.DROP_2:
-            clear_zone.append((state.row + 1, state.col))           # down 1
-            next_row, next_col = (state.row + 2, state.col)         # down 2
+            # set movement direction
+            if action in {self.GLIDE_LEFT_1, self.GLIDE_LEFT_2, self.GLIDE_LEFT_3}:
+                move_dir = -1
+            else:
+                move_dir = 1
 
-        elif action == self.DROP_3:
-            clear_zone.append((state.row + 1, state.col))           # down 1
-            clear_zone.append((state.row + 2, state.col))           # down 2
-            next_row, next_col = (state.row + 3, state.col)         # down 3
+            # move sampled distance in chosen direction
+            next_row, next_col = state.row + 1, state.col
+            next_gem_status = state.gem_status
+            for d in range(move_dist):
+                next_col += move_dir
+
+                # check for collision or game over
+                next_row, next_col, reward, collision, is_terminal = \
+                    self.__check_collision_or_terminal_glide(next_row, next_col, reward,
+                                                             row_move_dir=0, col_move_dir=move_dir)
+                if collision or is_terminal:
+                    break
+
+            # check if a gem is collected or goal is reached (only do this for final position of charge)
+            next_gem_status, is_terminal = self.__check_gem_collected_or_goal_reached(next_row,
+                                                                                      next_col,
+                                                                                      next_gem_status)
+
+            return True, reward, GameState(next_row, next_col, next_gem_status), is_terminal
+
+        elif action in self.DROP_ACTIONS:
+            move_dist = {self.DROP_1: 1, self.DROP_2: 2, self.DROP_3: 3}[action]
+
+            # drop by chosen distance
+            next_row, next_col = state.row, state.col
+            next_gem_status = state.gem_status
+            for d in range(move_dist):
+                next_row += 1
+
+                # check for collision or game over
+                next_row, next_col, reward, collision, is_terminal = \
+                    self.__check_collision_or_terminal_glide(next_row, next_col, reward, row_move_dir=1, col_move_dir=0)
+                if collision or is_terminal:
+                    break
+
+            # check if a gem is collected or goal is reached (only do this for final position of charge)
+            next_gem_status, is_terminal = self.__check_gem_collected_or_goal_reached(next_row,
+                                                                                      next_col,
+                                                                                      next_gem_status)
+
+            return True, reward, GameState(next_row, next_col, next_gem_status), is_terminal
 
         else:
             assert False, '!!! Invalid action given to perform_action() !!!'
-
-        # check that next_state is within bounds
-        if not (0 <= next_row < self.n_rows and 0 <= next_col < self.n_cols):
-            # next state is out of bounds
-            return False, state.deepcopy()
-
-        # check for a collision (with either next state or a clear zone state)
-        if self.grid_data[next_row][next_col] in (self.SOLID_TILE, self.LAVA_TILE):
-            # next state results in collision
-            return False, state.deepcopy()
-        for (r, c) in clear_zone:
-            if self.grid_data[r][c] in (self.SOLID_TILE, self.LAVA_TILE):
-                # moving through clear zone to next state results in collision
-                return False, state.deepcopy()
-
-        # check if a gem is collected
-        if (next_row, next_col) in self.gem_positions and \
-                state.gem_status[self.gem_positions.index((next_row, next_col))] == 0:
-            next_gem_status = list(state.gem_status)
-            next_gem_status[self.gem_positions.index((next_row, next_col))] = 1
-            next_gem_status = tuple(next_gem_status)
-        else:
-            next_gem_status = state.gem_status
-
-        return True, GameState(next_row, next_col, next_gem_status)
 
     def is_solved(self, state):
         """
@@ -256,12 +450,12 @@ class GameEnv:
 
     def is_game_over(self, state):
         """
-        Check if a game over situation has occurred (i.e. player has landed on a lava tile)
+        Check if a game over situation has occurred (i.e. player has entered on a lava tile)
         :param state: current GameState
         :return: True if game over, False otherwise
         """
         assert 0 < state.row < self.n_rows - 1 and 0 < state.col < self.n_cols - 1, '!!! invalid player coordinates !!!'
-        return self.grid_data[state.row + 1][state.col] == self.LAVA_TILE
+        return self.grid_data[state.row][state.col] == self.LAVA_TILE
 
     def render(self, state):
         """
@@ -280,6 +474,8 @@ class GameEnv:
                         state.gem_status[self.gem_positions.index((r, c))] == 0:
                     # current tile is an uncollected gem
                     line += self.grid_data[r][c] + 'G' + self.grid_data[r][c]
+                elif self.grid_data[r][c] in {self.SUPER_CHARGE_TILE, self.SUPER_JUMP_TILE}:
+                    line += '[' + self.grid_data[r][c] + ']'
                 else:
                     line += self.grid_data[r][c] * 3
             print(line)

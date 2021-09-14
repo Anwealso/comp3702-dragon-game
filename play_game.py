@@ -1,7 +1,7 @@
 import sys
+import time
 
 from game_env import GameEnv
-from solution import write_output_file
 
 """
 play_game.py
@@ -18,28 +18,23 @@ If an output filename is provided, the sequence of actions you perform will be s
 When prompted for an action, type one of the available action strings (e.g. wr, wl, etc) and press enter to perform the
 entered action.
 
-COMP3702 2021 Assignment 1 Support Code
+COMP3702 2021 Assignment 2 Support Code
 
-Last updated by njc 28/07/21
+Last updated by njc 02/09/21
 """
 
 
 def main(arglist):
-    if len(arglist) != 1 and len(arglist) != 2:
+    if len(arglist) != 1:
         print("Running this file launches an interactive game session.")
-        print("Usage: play_game.py [input_filename] (optional)[output_filename]")
+        print("Usage: play_game.py [input_filename]")
         return -1
 
     input_file = arglist[0]
-    if len(arglist) > 1:
-        output_file = arglist[1]
-    else:
-        output_file = None
 
     game_env = GameEnv(input_file)
     persistent_state = game_env.get_init_state()
-    actions = []
-    total_cost = 0
+    total_reward = 0
 
     # run simulation
     while True:
@@ -50,26 +45,25 @@ def main(arglist):
             print('Quitting.')
             break
         if a not in GameEnv.ACTIONS:
-            print('Invalid action. Choose again.')
+            print('Unrecognised action. Choose again.')
             continue
-        actions.append(a)
-        total_cost += game_env.ACTION_COST[a]
-        success, persistent_state = game_env.perform_action(persistent_state, a)
-        if not success:
-            print('Collision occurred.')
-        if game_env.is_solved(persistent_state):
-            game_env.render(persistent_state)
-            print(f'Level completed with total cost of {round(total_cost, 1)}!')
-            break
-        elif game_env.is_game_over(persistent_state):
-            game_env.render(persistent_state)
-            print(f'Game Over. total cost = {round(total_cost, 1)}')
-            break
-
-    # write actions to output file
-    if output_file is not None and len(actions) > 0:
-        write_output_file(output_file, actions)
-    return 0
+        valid, reward, new_state, terminal = game_env.perform_action(persistent_state, a, time.time())
+        if not valid:
+            print('Action is invalid for the current state. Choose again.')
+            continue
+        else:
+            persistent_state = new_state
+        print(f'Received reward: {reward}')
+        total_reward += reward
+        if terminal:
+            if reward > (-1 * game_env.game_over_penalty):
+                print(f'Level completed with total reward of {round(total_reward, 1)} '
+                      f'(benchmark reward = {game_env.reward_tgt})')
+                break
+            else:
+                print(f'Game Over, with total reward of {round(total_reward, 1)} '
+                      f'(benchmark reward = {game_env.reward_tgt})')
+                break
 
 
 if __name__ == '__main__':

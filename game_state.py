@@ -3,7 +3,7 @@ game_state.py
 
 This file contains a class representing an Untitled Dragon Game state. You should make use of this class in your solver.
 
-COMP3702 2021 Assignment 1 Support Code
+COMP3702 2021 Assignment 2 Support Code
 
 Last updated by njc 27/07/21
 """
@@ -32,6 +32,9 @@ class GameState:
 
     def __hash__(self):
         return hash((self.row, self.col, *self.gem_status))
+
+    def __repr__(self):
+        return f'{self.row}, {self.col}, {self.gem_status}'
 
     def deepcopy(self):
         return GameState(self.row, self.col, self.gem_status)
