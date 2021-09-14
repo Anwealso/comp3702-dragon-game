@@ -81,8 +81,8 @@ class Node():
         return hash((self.game_state.row, self.game_state.col, self.game_state.gem_status))
 
     def __lt__(self, other):
-        return True
-        # return self.path_cost < other.path_cost
+        # return True
+        return self.path_cost < other.path_cost
 
     def get_successors(self, game_env):
         # Gets the possible successor nodes from this node.
@@ -166,12 +166,12 @@ def ucs(game_env):
     # Create a set to hold the nodes that have been explored from
     explored = {initial_state: 0}
     # Create a PriorityQueue to hold the nodes that have been explored from
-    unexplored = [(0, Node(initial_state,[],0))]
+    unexplored = [Node(initial_state,[],0)]
     heapq.heapify(unexplored)
 
     while len(unexplored) > 0:
         # Get the next node to explore
-        _, current_node = heapq.heappop(unexplored)
+        current_node = heapq.heappop(unexplored)
 
         # Check if this node solves the search problem
         if game_env.is_solved(current_node.game_state):
@@ -187,7 +187,7 @@ def ucs(game_env):
             if successor.game_state not in explored.keys() or successor.path_cost < explored[successor.game_state]:
                 # Add to lists
                 explored[successor.game_state] = successor.path_cost
-                heapq.heappush(unexplored, (successor.path_cost, successor))
+                heapq.heappush(unexplored, successor)
 
     return None
 

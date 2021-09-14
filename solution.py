@@ -5,7 +5,7 @@ from game_env import GameEnv
 from game_state import GameState
 
 # TODO: change this back to original ucs file before submission
-from tute3_ucs_v2 import ucs
+from ucs import ucs
 from a_star import a_star
 
 """
