@@ -1,0 +1,16 @@
+# n_rows, n_cols
+7, 8
+# training time limit
+300.0
+# training reward target
+-2000000.0
+# evaluation reward target
+-20.0
+# grid data
+XXXXXXXX
+XX  X  X
+X      X
+XG   G X
+XX  CX X
+XE  P  X
+XXJJXXJX

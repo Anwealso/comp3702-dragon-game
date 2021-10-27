@@ -1,0 +1,17 @@
+# suggested: SARSA
+# n_rows, n_cols
+7, 13
+# training time limit
+300.0
+# training reward target
+-6000000.0
+# evaluation reward target
+-24.0
+# grid data
+XXXXXXXXXXXXX
+X     P     X
+X =XXXXXXX= X
+X =       = X
+XE=========GX
+XXX*******XXX
+XXXXXXXXXXXXX
