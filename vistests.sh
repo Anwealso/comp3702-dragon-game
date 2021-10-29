@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # Keep track of how many we passed or failed
 passed=0
 failed=0
@@ -7,8 +8,8 @@ then
     # If user inputs a specific test no., then run that
     echo "[[ Test $1: ]]"
     # Run the visualiser script
-#    python3 visualiser.py testcases/a2-t$1.txt 2> temp.txt;
-    python3 visualiser.py testcases/a2-t$1.txt;
+#    python3 visualiser.py testcases/a3-t$1.txt 2> temp.txt;
+    python3 visualiser.py testcases/a3-t$1.txt;
     # Save the output status (255=crash, 254=overtime, otherwise returns the score /50)
     echo $? > temp.txt
     exitcode=$(cat temp.txt)
@@ -30,12 +31,12 @@ then
     echo ""
 
 else
-    for i in 1 2 3 4 5 6 7 8
+    for i in 1 2 3 4 5
     do
         echo "[[ Test $i: ]]"
         # Run the visualiser script
-#        python3 visualiser.py testcases/a2-t$i.txt 2> temp.txt;
-        python3 visualiser.py testcases/a2-t$i.txt;
+#        python3 visualiser.py testcases/a3-t$i.txt 2> temp.txt;
+        python3 visualiser.py testcases/a3-t$i.txt;
         # Save the output status (255=crash, 254=overtime, otherwise returns the score /50)
         echo $? > temp.txt
         exitcode=$(cat temp.txt)
