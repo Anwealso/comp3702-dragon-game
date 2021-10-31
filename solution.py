@@ -261,3 +261,22 @@ def get_states(game_env: GameEnv):
                 if game_env.grid_data[row][col] != game_env.SOLID_TILE:
                     states.append(state)
     return states
+
+
+def get_legal_actions(game_env: GameEnv, state: GameState):
+    legal_actions = []
+
+    for action in game_env.ACTIONS:
+        # check if the given action is valid for the given state
+        if action in {game_env.WALK_LEFT, game_env.WALK_RIGHT, game_env.JUMP}:
+            # check walkable ground prerequisite if action is walk or jump
+            if game_env.grid_data[state.row + 1][state.col] in game_env.WALK_JUMP_ALLOWED_TILES:
+                # prerequisite is satisfied
+                legal_actions.append(action)
+        else:
+            # check permeable ground prerequisite if action is glide or drop
+            if game_env.grid_data[state.row + 1][state.col] in game_env.GLIDE_DROP_ALLOWED_TILES:
+                # prerequisite is satisfied
+                legal_actions.append(action)
+
+    return legal_actions
