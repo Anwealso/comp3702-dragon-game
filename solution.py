@@ -43,7 +43,8 @@ class RLAgent:
 
         # TODO: Initialise any instance variables you require here.
         self.game_env = game_env
-        self.algorithm = "qlearning"
+        self.algorithm = "sarsa"
+        print(f'ALGORITHM: {self.algorithm}')
 
         self.solver = RLSolver(game_env)
 
@@ -68,7 +69,7 @@ class RLAgent:
 
             # TODO: Code for training can go here
 
-            # if iterations % 1000 == 0:
+            # if iterations % 1 == 0:
             #     print(f'Iteration {iterations}: ')
             #     self.solver.print_values_and_policy()
             #     print(f'Current State: {self.solver.persistent_state}.')
@@ -81,6 +82,10 @@ class RLAgent:
                 # run qlearning training
                 self.solver.next_iteration_q()
 
+            if self.algorithm == "sarsa":
+                # run sarsa training
+                self.solver.next_iteration_sarsa()
+
                 # self.solver.print_values()
                 # _ = input("Press Enter to Continue...")
 
@@ -88,9 +93,6 @@ class RLAgent:
                 #     self.solver.print_agent_position()
                     # time.sleep(0.1)
 
-            elif self.algorithm == "sarsa":
-                # run sarsa training
-                pass
             else:
                 raise ValueError
             iterations = iterations + 1
@@ -116,14 +118,7 @@ class RLAgent:
 
         # TODO: Code for selecting an action based on learned Q-values can go here
 
-        if self.algorithm == "qlearning":
-            # select action
-            return self.solver.select_action(state)
-        elif self.algorithm == "sarsa":
-            # select action
-            pass
-        else:
-            raise ValueError
+        return self.solver.select_action(state)
 
     # TODO: Code for any additional methods you need can go here
 
@@ -144,6 +139,9 @@ class RLSolver:
         # self.persistent_state = random.choice(self.states)  # internal state used for training
         # self.persistent_state = GameState(1, 10, (1, 1))
         self.persistent_state = GameState(self.game_env.init_row, self.game_env.init_col, tuple(0 for g in self.game_env.gem_positions))
+
+        random.seed(time.time())
+        self.persistent_action = random.choice(get_legal_actions(self.game_env, self.persistent_state))
         # print("###")
         # print(f'STARTING STATE: {self.persistent_state}')
         # print("###")
@@ -196,7 +194,7 @@ class RLSolver:
                 best_q1 = self.q_values[(next_state, a1)]
                 # print((next_state, a1, self.q_values[(next_state, a1)]))
                 # best_a1 = a1
-        if self.game_env.is_solved(next_state):
+        if state_is_terminal:
             best_q1 = 0  # assign the goal state a good reward - e.g. 0
 
         # Calculate the target
@@ -279,7 +277,7 @@ class RLSolver:
                 best_q1 = self.q_values[(next_state, a1)]
                 # print((next_state, a1, self.q_values[(next_state, a1)]))
                 # best_a1 = a1
-        if self.game_env.is_solved(next_state):
+        if state_is_terminal:
             best_q1 = 0  # assign the goal state a good reward - e.g. 0
 
         # Calculate the target
@@ -303,8 +301,7 @@ class RLSolver:
             random.seed(time.time())
             # self.print_values()
             self.persistent_state = random.choice(self.states)
-            self.persistent_state = GameState(self.game_env.init_row, self.game_env.init_col,
-                                              tuple(0 for g in self.game_env.gem_positions))
+            self.persistent_state = GameState(self.game_env.init_row, self.game_env.init_col, tuple(0 for g in self.game_env.gem_positions))
 
             # self.print_values()
             # print(f'____________ Starting new Episode at: {self.persistent_state} ____________')
