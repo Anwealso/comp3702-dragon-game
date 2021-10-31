@@ -24,6 +24,7 @@ Last updated by njc 10/10/21
 """
 verbose = False
 episodes = 0
+full_episodes = 0
 
 # Initial Q Value
 Q_INITIAL = -math.inf
@@ -68,6 +69,7 @@ class RLAgent:
         exits before the time limit is exceeded.
         """
         global episodes
+        global full_episodes
         t0 = time.time()
 
         iterations = 0
@@ -104,9 +106,9 @@ class RLAgent:
                 raise ValueError
             iterations = iterations + 1
 
-        print(f'Completed {iterations} iterations (across {episodes} episodes) of training in'
-              f' {round(time.time() - t0,1)} seconds.')
         self.solver.print_values_and_policy()
+        print(f'Completed {iterations} iterations (across {episodes} episodes, of which {full_episodes} full episodes) '
+              f'of training in {round(time.time() - t0,1)} seconds.')
 
     def select_action(self, state):
         """
@@ -163,11 +165,13 @@ class QLearningSolver:
     def next_iteration_q(self):
         global verbose
         global episodes
+        global full_episodes
 
         # Check if we have an existing q value for this s,a pair - if we do, assign best_q and best_a to be
         # that, but otherwise if we haven't tried this s,a pair before, assign best_q = -INF and best_a = None
         best_q = Q_INITIAL
         best_a = None
+        actions = get_legal_actions(self.game_env, self.persistent_state)
         for a in self.game_env.ACTIONS:
             if ((self.persistent_state, a) in self.q_values.keys() and
                     self.q_values[(self.persistent_state, a)] > best_q):
@@ -199,6 +203,7 @@ class QLearningSolver:
                 # If not explored, best action = None, best q value = -INF
                 best_q1 = Q_INITIAL
                 # best_a1 = None
+                # actions1 = get_legal_actions(self.game_env, next_state)
                 for a1 in self.game_env.ACTIONS:
                     if ((next_state, a1) in self.q_values.keys() and
                             self.q_values[(next_state, a1)] > best_q1):
@@ -236,6 +241,8 @@ class QLearningSolver:
                     # print("")
 
                     episodes = episodes + 1
+                    if next_state == get_exit_state(self.game_env):
+                        full_episodes = full_episodes + 1
                     # _ = input("Press Enter to Continue...")
                 else:
                     # If we haven't reached the exit explore the next state
