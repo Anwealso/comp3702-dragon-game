@@ -26,9 +26,6 @@ verbose = False
 episodes = 0
 full_episodes = 0
 
-# Initial Q Value
-Q_INITIAL = -math.inf
-
 
 class RLAgent:
     def __init__(self, game_env: GameEnv):
@@ -169,7 +166,7 @@ class QLearningSolver:
 
         # Check if we have an existing q value for this s,a pair - if we do, assign best_q and best_a to be
         # that, but otherwise if we haven't tried this s,a pair before, assign best_q = -INF and best_a = None
-        best_q = Q_INITIAL
+        best_q = -math.inf
         best_a = None
         actions = get_legal_actions(self.game_env, self.persistent_state)
         for a in actions:
@@ -198,7 +195,7 @@ class QLearningSolver:
 
         # Check if we have explored the next (successor) state and get its best action and q-value
         # If not explored, best action = None, best q value = -INF
-        best_q1 = Q_INITIAL
+        best_q1 = -math.inf
         # best_a1 = None
         # actions1 = get_legal_actions(self.game_env, next_state)
         for a1 in self.game_env.ACTIONS:
@@ -251,7 +248,7 @@ class QLearningSolver:
 
         # Check if we have an existing q value for this s,a pair - if we do, assign best_q and best_a to be
         # that, but otherwise if we haven't tried this s,a pair before, assign best_q = -INF and best_a = None
-        best_q = Q_INITIAL
+        best_q = -math.inf
         best_a = None
         for a in self.game_env.ACTIONS:
             if ((self.persistent_state, a) in self.q_values.keys() and
@@ -282,7 +279,7 @@ class QLearningSolver:
 
                 # Check if we have explored the next (successor) state and get its best action and q-value
                 # If not explored, best action = None, best q value = -INF
-                best_q1 = Q_INITIAL
+                best_q1 = -math.inf
                 # best_a1 = None
                 for a1 in self.game_env.ACTIONS:
                     if ((next_state, a1) in self.q_values.keys() and
@@ -341,7 +338,7 @@ class QLearningSolver:
 
     def select_action(self, state):
         # choose the action with the highest Q-value for the given state
-        best_q = Q_INITIAL
+        best_q = -math.inf
         best_a = None
         for a in self.game_env.ACTIONS:
             if ((state, a) in self.q_values.keys() and
@@ -378,7 +375,7 @@ class QLearningSolver:
         for state in self.states:
             if state.gem_status == gem_status:
                 # Find the q value and policy for each state
-                best_q = Q_INITIAL
+                best_q = -math.inf
                 best_a = None
                 for a in self.game_env.ACTIONS:
                     if ((state, a) in self.q_values.keys()) and (self.q_values[(state, a)] > best_q):
@@ -436,7 +433,7 @@ class QLearningSolver:
         for state in self.states:
             if state.gem_status == gem_status:
                 # Find the q value and policy for each state
-                best_q = Q_INITIAL
+                best_q = -math.inf
                 for a in self.game_env.ACTIONS:
                     if ((state, a) in self.q_values.keys()) and (self.q_values[(state, a)] > best_q):
                         best_q = self.q_values[(state, a)]
