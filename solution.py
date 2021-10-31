@@ -45,15 +45,7 @@ class RLAgent:
         self.game_env = game_env
         self.algorithm = "qlearning"
 
-        if self.algorithm == "qlearning":
-            # init a qlearning agent class
-            self.solver = QLearningSolver(game_env)
-            pass
-        elif self.algorithm == "sarsa":
-            # init a sarsa agent class
-            pass
-        else:
-            raise ValueError
+        self.solver = RLSolver(game_env)
 
     def run_training(self):
         """
@@ -136,7 +128,7 @@ class RLAgent:
     # TODO: Code for any additional methods you need can go here
 
 
-class QLearningSolver:
+class RLSolver:
     def __init__(self, game_env: GameEnv):
         """
         Constructor for the q-learning class.
@@ -245,89 +237,86 @@ class QLearningSolver:
     def next_iteration_sarsa(self):
         global verbose
         global episodes
+        global full_episodes
 
         # Check if we have an existing q value for this s,a pair - if we do, assign best_q and best_a to be
         # that, but otherwise if we haven't tried this s,a pair before, assign best_q = -INF and best_a = None
         best_q = -math.inf
         best_a = None
-        for a in self.game_env.ACTIONS:
+        actions = get_legal_actions(self.game_env, self.persistent_state)
+        for a in actions:
             if ((self.persistent_state, a) in self.q_values.keys() and
                     self.q_values[(self.persistent_state, a)] > best_q):
                 best_q = self.q_values[(self.persistent_state, a)]
                 best_a = a
 
-        while True:  # keep trying actions until we get a valid one we can update the q-value for
-            # ===== Decide an action to try (either explore or exploit) =====
+        # ===== Decide an action to try (either explore or exploit) =====
+        random.seed(time.time())
+        a = random.random()
+        if best_a is None or a < self.epsilon:
+            action = random.choice(actions)
+        else:
+            action = best_a
+
+        # ===== Simulate result of action =====
+        (action_is_valid, reward, next_state, state_is_terminal) = self.game_env.perform_action(
+            self.persistent_state, action, seed=time.time())
+
+        # ===== update value table =====
+        # Q(s,a) <-- Q(s,a) + alpha * (temporal difference)
+        # Q(s,a) <-- Q(s,a) + alpha * (target - Q(s, a))
+        # target = r + gamma * max_{a' in A} Q(s', a')
+        # compute target
+
+        # Check if we have explored the next (successor) state and get its best action and q-value
+        # If not explored, best action = None, best q value = -INF
+        best_q1 = -math.inf
+        # best_a1 = None
+        # actions1 = get_legal_actions(self.game_env, next_state)
+        for a1 in self.game_env.ACTIONS:
+            if ((next_state, a1) in self.q_values.keys() and
+                    self.q_values[(next_state, a1)] > best_q1):
+                best_q1 = self.q_values[(next_state, a1)]
+                # print((next_state, a1, self.q_values[(next_state, a1)]))
+                # best_a1 = a1
+        if self.game_env.is_solved(next_state):
+            best_q1 = 0  # assign the goal state a good reward - e.g. 0
+
+        # Calculate the target
+        target = reward + (self.discount * best_q1)
+
+        # Calculate the new q-value using TD (difference between old q-value and target)
+        if ((self.persistent_state, action) in self.q_values) and \
+                (self.q_values[(self.persistent_state, action)] != -math.inf):
+            old_q = self.q_values[(self.persistent_state, action)]
+        else:
+            old_q = 0
+        self.q_values[(self.persistent_state, action)] = old_q + (self.alpha * (target - old_q))
+
+        # if not math.isnan(self.q_values[(self.persistent_state, action)]) and self.q_values[(
+        #         self.persistent_state, action)] != -math.inf:
+        #     print(self.q_values[(self.persistent_state, action)])
+
+        # move to next state
+        if state_is_terminal:
+            # If we reached the exit dump the agent back in a random state to start and try again
             random.seed(time.time())
-            a = random.random()
-            if best_a is None or a < self.epsilon:
-                action = random.choice(list(self.game_env.ACTIONS))
-            else:
-                action = best_a
+            # self.print_values()
+            self.persistent_state = random.choice(self.states)
+            self.persistent_state = GameState(self.game_env.init_row, self.game_env.init_col,
+                                              tuple(0 for g in self.game_env.gem_positions))
 
-            # ===== Simulate result of action =====
-            (action_is_valid, reward, next_state, state_is_terminal) = self.game_env.perform_action(
-                self.persistent_state, action, seed=time.time())
+            # self.print_values()
+            # print(f'____________ Starting new Episode at: {self.persistent_state} ____________')
+            # print("")
 
-            # If the action is legal, calculate the value of that action and update the q value for the s,a pair
-            if action_is_valid:
-                # ===== update value table =====
-                # Q(s,a) <-- Q(s,a) + alpha * (temporal difference)
-                # Q(s,a) <-- Q(s,a) + alpha * (target - Q(s, a))
-                # target = r + gamma * max_{a' in A} Q(s', a')
-                # compute target
-
-                # Check if we have explored the next (successor) state and get its best action and q-value
-                # If not explored, best action = None, best q value = -INF
-                best_q1 = -math.inf
-                # best_a1 = None
-                for a1 in self.game_env.ACTIONS:
-                    if ((next_state, a1) in self.q_values.keys() and
-                            self.q_values[(next_state, a1)] > best_q1):
-                        best_q1 = self.q_values[(next_state, a1)]
-                        # print((next_state, a1, self.q_values[(next_state, a1)]))
-                        # best_a1 = a1
-                if self.game_env.is_solved(next_state):
-                    best_q1 = 0  # assign the goal state a good reward - e.g. 0
-
-                # Calculate the target
-                target = reward + (self.discount * best_q1)
-
-                # Calculate the new q-value using TD (difference between old q-value and target)
-                if ((self.persistent_state, action) in self.q_values) and \
-                        (self.q_values[(self.persistent_state, action)] != -math.inf):
-                    old_q = self.q_values[(self.persistent_state, action)]
-                else:
-                    old_q = 0
-                self.q_values[(self.persistent_state, action)] = old_q + (self.alpha * (target - old_q))
-
-                # if not math.isnan(self.q_values[(self.persistent_state, action)]) and self.q_values[(
-                #         self.persistent_state, action)] != -math.inf:
-                #     print(self.q_values[(self.persistent_state, action)])
-
-                # move to next state
-                if state_is_terminal:
-                    # If we reached the exit dump the agent back in a random state to start and try again
-                    random.seed(time.time())
-                    # self.print_values()
-                    self.persistent_state = random.choice(self.states)
-                    self.persistent_state = GameState(self.game_env.init_row, self.game_env.init_col, tuple(0 for g in self.game_env.gem_positions))
-
-                    # self.print_values()
-                    # print(f'____________ Starting new Episode at: {self.persistent_state} ____________')
-                    # print("")
-
-                    episodes = episodes + 1
-                    # _ = input("Press Enter to Continue...")
-                else:
-                    # If we haven't reached the exit explore the next state
-                    self.persistent_state = next_state
-
-                # Break out of the while true loop
-                break
-
-            # If this action is impossible to execute from this state (i.e. jumping when already in the air),
-            # then randomly pick another action to try
+            episodes = episodes + 1
+            if next_state == get_exit_state(self.game_env):
+                full_episodes = full_episodes + 1
+            # _ = input("Press Enter to Continue...")
+        else:
+            # If we haven't reached the exit explore the next state
+            self.persistent_state = next_state
 
     def run_training(self, max_iterations):
         t0 = time.time()
