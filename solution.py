@@ -3,6 +3,7 @@ import time
 from game_env import GameEnv
 from game_state import GameState
 import random as random
+import math as math
 
 """
 solution.py
@@ -114,9 +115,9 @@ class QLearningAgent:
     def __init__(self, game_env):
         self.game_env = game_env
 
-        self.states = [(0, 0), (1, 0), (2, 0), (3, 0), (0, 1), (2, 1), (3, 1), (0, 2), (1, 2), (2, 2), (3, 2)]
+        self.states = get_states(game_env)
 
-        self.persistent_state = random.choice(self.states)  # internal state used for training
+        self.persistent_state = get_initial_state(game_env)  # internal state used for training
 
         self.q_values = {}  # dict mapping (state, action) to float
 
@@ -223,3 +224,40 @@ class QLearningAgent:
                     line += ', '
             line += ']'
             print(line)
+
+
+def get_initial_state(game_env: GameEnv):
+    """
+    Gets the initial agent position (starting position) in the game_env for this level
+
+    :param game_env: the game environment for the current map the agent is solving
+    :return: the initial gamestate
+    """
+    return GameState(game_env.init_row, game_env.init_col, tuple(0 for g in game_env.gem_positions))
+
+
+def get_states(game_env: GameEnv):
+    """
+    Get a list of all the possible states the agent can occupy (see list below)
+        - agent CAN occupy the exit state, lava tiles, any permeable tiles like gems, air or ladder tiles;
+        - agent CANNOT occupy any solid tiles like wall tile and super charge and jump blocks
+
+    :param game_env: the game environment for the current map the agent is solving
+    :return: a list of all the possible states the agent can occupy
+    """
+    states = []  # set up a list of all the possible game states
+    for row in range(0, game_env.n_rows):
+        for col in range(0, game_env.n_cols):
+            for gem_digits in range(0, int(math.pow(2, game_env.n_gems))):
+                gem_string = bin(gem_digits)[2:].zfill(game_env.n_gems)
+                gem_list = list(gem_string)
+
+                for i in range(0, len(gem_list)):
+                    gem_list[i] = int(gem_list[i])
+
+                gem_tuple = tuple(gem_list)
+                state = GameState(row, col, gem_tuple)
+
+                if game_env.grid_data[row][col] != game_env.SOLID_TILE:
+                    states.append(state)
+    return states
