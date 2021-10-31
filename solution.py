@@ -88,7 +88,7 @@ class RLAgent:
 
             if self.algorithm == "qlearning":
                 # run qlearning training
-                self.solver.next_iteration()
+                self.solver.next_iteration_q()
 
                 # self.solver.print_values()
                 # _ = input("Press Enter to Continue...")
@@ -153,14 +153,101 @@ class QLearningSolver:
         # self.persistent_state = random.choice(self.states)  # internal state used for training
         # self.persistent_state = GameState(1, 10, (1, 1))
         self.persistent_state = GameState(self.game_env.init_row, self.game_env.init_col, tuple(0 for g in self.game_env.gem_positions))
-        print("###")
-        print(f'STARTING STATE: {self.persistent_state}')
-        print("###")
-        print("")
+        # print("###")
+        # print(f'STARTING STATE: {self.persistent_state}')
+        # print("###")
+        # print("")
 
         self.q_values = {}  # dict mapping (state, action) to float
 
-    def next_iteration(self):
+    def next_iteration_q(self):
+        global verbose
+        global episodes
+
+        # Check if we have an existing q value for this s,a pair - if we do, assign best_q and best_a to be
+        # that, but otherwise if we haven't tried this s,a pair before, assign best_q = -INF and best_a = None
+        best_q = Q_INITIAL
+        best_a = None
+        for a in self.game_env.ACTIONS:
+            if ((self.persistent_state, a) in self.q_values.keys() and
+                    self.q_values[(self.persistent_state, a)] > best_q):
+                best_q = self.q_values[(self.persistent_state, a)]
+                best_a = a
+
+        while True:  # keep trying actions until we get a valid one we can update the q-value for
+            # ===== Decide an action to try (either explore or exploit) =====
+            random.seed(time.time())
+            a = random.random()
+            if best_a is None or a < self.epsilon:
+                action = random.choice(list(self.game_env.ACTIONS))
+            else:
+                action = best_a
+
+            # ===== Simulate result of action =====
+            (action_is_valid, reward, next_state, state_is_terminal) = self.game_env.perform_action(
+                self.persistent_state, action, seed=time.time())
+
+            # If the action is legal, calculate the value of that action and update the q value for the s,a pair
+            if action_is_valid:
+                # ===== update value table =====
+                # Q(s,a) <-- Q(s,a) + alpha * (temporal difference)
+                # Q(s,a) <-- Q(s,a) + alpha * (target - Q(s, a))
+                # target = r + gamma * max_{a' in A} Q(s', a')
+                # compute target
+
+                # Check if we have explored the next (successor) state and get its best action and q-value
+                # If not explored, best action = None, best q value = -INF
+                best_q1 = Q_INITIAL
+                # best_a1 = None
+                for a1 in self.game_env.ACTIONS:
+                    if ((next_state, a1) in self.q_values.keys() and
+                            self.q_values[(next_state, a1)] > best_q1):
+                        best_q1 = self.q_values[(next_state, a1)]
+                        # print((next_state, a1, self.q_values[(next_state, a1)]))
+                        # best_a1 = a1
+                if self.game_env.is_solved(next_state):
+                    best_q1 = 0  # assign the goal state a good reward - e.g. 0
+
+                # Calculate the target
+                target = reward + (self.discount * best_q1)
+
+                # Calculate the new q-value using TD (difference between old q-value and target)
+                if ((self.persistent_state, action) in self.q_values) and \
+                        (self.q_values[(self.persistent_state, action)] != -math.inf):
+                    old_q = self.q_values[(self.persistent_state, action)]
+                else:
+                    old_q = 0
+                self.q_values[(self.persistent_state, action)] = old_q + (self.alpha * (target - old_q))
+
+                # if not math.isnan(self.q_values[(self.persistent_state, action)]) and self.q_values[(
+                #         self.persistent_state, action)] != -math.inf:
+                #     print(self.q_values[(self.persistent_state, action)])
+
+                # move to next state
+                if state_is_terminal:
+                    # If we reached the exit dump the agent back in a random state to start and try again
+                    random.seed(time.time())
+                    # self.print_values()
+                    self.persistent_state = random.choice(self.states)
+                    self.persistent_state = GameState(self.game_env.init_row, self.game_env.init_col, tuple(0 for g in self.game_env.gem_positions))
+
+                    # self.print_values()
+                    # print(f'____________ Starting new Episode at: {self.persistent_state} ____________')
+                    # print("")
+
+                    episodes = episodes + 1
+                    # _ = input("Press Enter to Continue...")
+                else:
+                    # If we haven't reached the exit explore the next state
+                    self.persistent_state = next_state
+
+                # Break out of the while true loop
+                break
+
+            # If this action is impossible to execute from this state (i.e. jumping when already in the air),
+            # then randomly pick another action to try
+
+    def next_iteration_sarsa(self):
         global verbose
         global episodes
 
@@ -250,7 +337,7 @@ class QLearningSolver:
     def run_training(self, max_iterations):
         t0 = time.time()
         for i in range(max_iterations):
-            self.next_iteration()
+            self.next_iteration_q()
         print(f'Completed {max_iterations} iterations of training in {round(time.time() - t0, 1)} seconds.')
         print("")
 
@@ -398,7 +485,35 @@ class QLearningSolver:
         print('\n' * 2)
 
 
+def get_initial_state(game_env: GameEnv):
+    """
+    Gets the initial agent state (starting position and gem_status) in the game_env for this level
+
+    :param game_env: the game environment for the current map the agent is solving
+    :return: the initial game_state
+    """
+    return GameState(game_env.init_row, game_env.init_col, tuple(0 for g in game_env.gem_positions))
+
+
+def get_exit_state(game_env: GameEnv):
+    """
+    Gets the exit state in the game_env for this level
+
+    :param game_env: the game environment for the current map the agent is solving
+    :return: the exit game_state
+    """
+    return GameState(game_env.exit_row, game_env.exit_col, tuple(1 for g in game_env.gem_positions))
+
+
 def get_states(game_env: GameEnv):
+    """
+    Get a list of all the possible states the agent can occupy (see list below)
+        - agent CAN occupy the exit state, lava tiles, any permeable tiles like gems, air or ladder tiles;
+        - agent CANNOT occupy any solid tiles like wall tile and super charge and jump blocks
+
+    :param game_env: the game environment for the current map the agent is solving
+    :return: a list of all the possible states the agent can occupy
+    """
     states = []  # set up a list of all the possible game states
     for row in range(0, game_env.n_rows):
         for col in range(0, game_env.n_cols):
@@ -416,20 +531,21 @@ def get_states(game_env: GameEnv):
                     states.append(state)
     return states
 
-# def get_legal_actions(game_state: GameState, game_env: GameEnv):
-#     states = []  # set up a list of all the possible game states
-#     for row in range(0, game_env.n_rows):
-#         for col in range(0, game_env.n_cols):
-#             for gem_digits in range(0, int(math.pow(2, game_env.n_gems))):
-#                 gem_string = bin(gem_digits)[2:].zfill(game_env.n_gems)
-#                 gem_list = list(gem_string)
-#
-#                 for i in range(0, len(gem_list)):
-#                     gem_list[i] = int(gem_list[i])
-#
-#                 gem_tuple = tuple(gem_list)
-#                 state = GameState(row, col, gem_tuple)
-#
-#                 if game_env.grid_data[row][col] != game_env.SOLID_TILE:
-#                     states.append(state)
-#     return states
+
+def get_legal_actions(game_env: GameEnv, state: GameState):
+    legal_actions = []
+
+    for action in game_env.ACTIONS:
+        # check if the given action is valid for the given state
+        if action in {game_env.WALK_LEFT, game_env.WALK_RIGHT, game_env.JUMP}:
+            # check walkable ground prerequisite if action is walk or jump
+            if game_env.grid_data[state.row + 1][state.col] in game_env.WALK_JUMP_ALLOWED_TILES:
+                # prerequisite is satisfied
+                legal_actions.append(action)
+        else:
+            # check permeable ground prerequisite if action is glide or drop
+            if game_env.grid_data[state.row + 1][state.col] in game_env.GLIDE_DROP_ALLOWED_TILES:
+                # prerequisite is satisfied
+                legal_actions.append(action)
+
+    return legal_actions
