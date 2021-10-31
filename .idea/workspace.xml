@@ -42,8 +42,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/solution.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="342">
-              <caret line="44" column="56" selection-start-line="44" selection-start-column="56" selection-end-line="44" selection-end-column="56" />
+            <state relative-caret-position="236">
+              <caret line="115" column="32" lean-forward="true" selection-start-line="115" selection-start-column="32" selection-end-line="115" selection-end-column="32" />
               <folding>
                 <element signature="e#0#11#0" expanded="true" />
               </folding>
@@ -54,8 +54,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/game_env.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-1321">
-              <caret line="273" column="43" selection-start-line="273" selection-end-line="274" />
+            <state relative-caret-position="165">
+              <caret line="238" column="29" selection-start-line="238" selection-start-column="25" selection-end-line="238" selection-end-column="29" />
               <folding>
                 <element signature="e#0#13#0" expanded="true" />
               </folding>
@@ -67,9 +67,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>-math</find>
-      <find>Q_INITIAL</find>
-      <find>(1, 1)</find>
       <find>1, 1</find>
       <find>of training i</find>
       <find>`</find>
@@ -94,9 +91,12 @@
       <find>elf.p</find>
       <find>is_solved</find>
       <find>ACTIONS</find>
-      <find>ACTIONS</find>
       <find>.ACTIONS</find>
       <find>0 for</find>
+      <find>actions na</find>
+      <find>actions</find>
+      <find>ACTIONS</find>
+      <find>exit</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -242,7 +242,14 @@
       <option name="project" value="LOCAL" />
       <updated>1635643953783</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="Added get_legal_actions() function to cut down on the number of actions having to be tried in the next_iteration loop">
+      <created>1635644602477</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1635644602477</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -254,7 +261,7 @@
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info anchor="bottom" id="Version Control" weight="0.32876712" />
       <window_info anchor="bottom" id="Python Console" />
-      <window_info active="true" anchor="bottom" id="Terminal" visible="true" weight="0.28219178" />
+      <window_info active="true" anchor="bottom" id="Terminal" visible="true" weight="0.33150685" />
       <window_info anchor="bottom" id="Event Log" side_tool="true" weight="0.32876712" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32876712" />
@@ -301,7 +308,8 @@
     <MESSAGE value="Starting again from the provided support file version of solution.py. All old progress on solution.py has been renamed into solution_old.py" />
     <MESSAGE value="Fresh base of new solution.py to build from" />
     <MESSAGE value="Added support functions get_states() and get_initial_state()" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added support functions get_states() and get_initial_state()" />
+    <MESSAGE value="Added get_legal_actions() function to cut down on the number of actions having to be tried in the next_iteration loop" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added get_legal_actions() function to cut down on the number of actions having to be tried in the next_iteration loop" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/play_game.py">
@@ -394,8 +402,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/game_env.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1321">
-          <caret line="273" column="43" selection-start-line="273" selection-end-line="274" />
+        <state relative-caret-position="165">
+          <caret line="238" column="29" selection-start-line="238" selection-start-column="25" selection-end-line="238" selection-end-column="29" />
           <folding>
             <element signature="e#0#13#0" expanded="true" />
           </folding>
@@ -404,8 +412,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/solution.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="342">
-          <caret line="44" column="56" selection-start-line="44" selection-start-column="56" selection-end-line="44" selection-end-column="56" />
+        <state relative-caret-position="236">
+          <caret line="115" column="32" lean-forward="true" selection-start-line="115" selection-start-column="32" selection-end-line="115" selection-end-column="32" />
           <folding>
             <element signature="e#0#11#0" expanded="true" />
           </folding>

@@ -125,7 +125,8 @@ class QLearningAgent:
         # ===== select an action to perform (epsilon greedy exploration) =====
         best_q = -math.inf
         best_a = None
-        for a in ACTIONS:
+        actions = get_legal_actions(self.game_env, self.persistent_state)  # legal actions from this state
+        for a in actions:
             if ((self.persistent_state, a) in self.q_values.keys() and
                     self.q_values[(self.persistent_state, a)] > best_q):
                 best_q = self.q_values[(self.persistent_state, a)]
@@ -133,7 +134,7 @@ class QLearningAgent:
 
         # epsilon chance to choose random action
         if best_a is None or random.random() < self.EPSILON:
-            action = random.choice(ACTIONS)
+            action = random.choice(actions)
         else:
             action = best_a
 
@@ -147,14 +148,14 @@ class QLearningAgent:
         # compute target
         best_q1 = -math.inf
         best_a1 = None
-        for a1 in ACTIONS:
+        for a1 in actions:
             if ((next_state, a1) in self.q_values.keys() and
                     self.q_values[(next_state, a1)] > best_q1):
                 best_q1 = self.q_values[(next_state, a1)]
                 best_a1 = a1
-        if best_a1 is None or next_state == EXIT_STATE:
+        if best_a1 is None or next_state == get_exit_state(self.game_env):
             best_q1 = 0
-        target = reward + (self.grid.discount * best_q1)
+        target = reward + (self.DISCOUNT * best_q1)
         if (self.persistent_state, action) in self.q_values:
             old_q = self.q_values[(self.persistent_state, action)]
         else:
@@ -174,14 +175,15 @@ class QLearningAgent:
         # choose the action with the highest Q-value for the given state
         best_q = -math.inf
         best_a = None
-        for a in ACTIONS:
+        actions = get_legal_actions(self.game_env, self.persistent_state)
+        for a in actions:
             if ((state, a) in self.q_values.keys() and
                     self.q_values[(state, a)] > best_q):
                 best_q = self.q_values[(state, a)]
                 best_a = a
 
         if best_a is None:
-            return random.choice(ACTIONS)
+            return random.choice(actions)
         else:
             return best_a
 
@@ -191,7 +193,8 @@ class QLearningAgent:
         for state in self.grid.states:
             best_q = -math.inf
             best_a = None
-            for a in ACTIONS:
+            actions = get_legal_actions(self.game_env, self.persistent_state)
+            for a in actions:
                 if ((state, a) in self.q_values.keys() and
                         self.q_values[(state, a)] > best_q):
                     best_q = self.q_values[(state, a)]
@@ -217,7 +220,7 @@ class QLearningAgent:
             line = '['
             for i, p in enumerate(row):
                 if p != 'N/A':
-                    line += ' ' + ACTIONS_NAMES[p] + ' '
+                    line += ' ' + p + ' '
                 else:
                     line += 'N/A'
                 if i != 3:
@@ -228,12 +231,22 @@ class QLearningAgent:
 
 def get_initial_state(game_env: GameEnv):
     """
-    Gets the initial agent position (starting position) in the game_env for this level
+    Gets the initial agent state (starting position and gem_status) in the game_env for this level
 
     :param game_env: the game environment for the current map the agent is solving
-    :return: the initial gamestate
+    :return: the initial game_state
     """
     return GameState(game_env.init_row, game_env.init_col, tuple(0 for g in game_env.gem_positions))
+
+
+def get_exit_state(game_env: GameEnv):
+    """
+    Gets the exit state in the game_env for this level
+
+    :param game_env: the game environment for the current map the agent is solving
+    :return: the exit game_state
+    """
+    return GameState(game_env.exit_row, game_env.exit_col, tuple(1 for g in game_env.gem_positions))
 
 
 def get_states(game_env: GameEnv):
