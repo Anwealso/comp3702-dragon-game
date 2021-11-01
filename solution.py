@@ -14,7 +14,7 @@ You must implement the following method stubs, which will be invoked by the simu
     __init__(game_env)
     run_training()
     select_action()
-    
+
 To ensure compatibility with the autograder, please avoid using try-except blocks for Exception or OSError exception
 types. Try-except blocks with concrete exception types other than OSError (e.g. try: ... except ValueError) are allowed.
 
@@ -28,6 +28,7 @@ full_episodes = 0
 stable_iterations = 0
 current_best_action = None
 last_best_action = None
+MAX_FULL_EPISODES = -1
 
 
 class RLAgent:
@@ -43,13 +44,19 @@ class RLAgent:
         This method has an allowed run time of 1 second, and will be terminated by the simulator if not completed within
         the limit.
         """
+        global MAX_FULL_EPISODES
 
         # TODO: Initialise any instance variables you require here.
         self.game_env = game_env
 
         if self.game_env.n_rows == 7 and self.game_env.n_cols == 12:
-            # SARSA for level 4
+            # SARSA for levels 4 and 5
             self.algorithm = "sarsa"
+            MAX_FULL_EPISODES = 3500
+        elif self.game_env.n_rows == 7 and self.game_env.n_cols == 13:
+            # SARSA for levels 4 and 5
+            self.algorithm = "sarsa"
+            MAX_FULL_EPISODES = 3900
         else:
             # qlearning for all other levels
             self.algorithm = "qlearning"
@@ -71,6 +78,7 @@ class RLAgent:
         global episodes
         global full_episodes
         global stable_iterations
+        global MAX_FULL_EPISODES
         t0 = time.time()
 
         iterations = 0
@@ -102,7 +110,7 @@ class RLAgent:
                 # run sarsa training
                 self.solver.next_iteration_sarsa()
 
-                if full_episodes >= 4000:
+                if full_episodes >= MAX_FULL_EPISODES:
                     break
 
                 # self.solver.print_values()
@@ -110,19 +118,22 @@ class RLAgent:
 
                 # if self.solver.persistent_state.gem_status == (1, 1):
                 #     self.solver.print_agent_position()
-                    # time.sleep(0.1)
+                # time.sleep(0.1)
 
             iterations = iterations + 1
 
-        # print("_____________________________ FINISHED TRAINING _____________________________")
-        # print(self.solver.q_values)
-        #
+        print("_____________________________ FINISHED TRAINING _____________________________")
+        print(self.solver.q_values)
+
         # self.solver.print_values_and_policy((0, 0))
         # self.solver.print_values_and_policy((1, 0))
         # self.solver.print_values_and_policy((1, 1))
 
+        self.solver.print_values_and_policy((0,))
+        self.solver.print_values_and_policy((1,))
+
         print(f'Completed {iterations} iterations (across {episodes} episodes, of which {full_episodes} full episodes) '
-              f'of training in {round(time.time() - t0,1)} seconds.')
+              f'of training in {round(time.time() - t0, 1)} seconds.')
 
     def select_action(self, state):
         """
@@ -240,7 +251,8 @@ class RLSolver:
             # If we reached the exit dump the agent back in a random state to start and try again
             random.seed(time.time())
             # self.print_values()
-            self.persistent_state = GameState(self.game_env.init_row, self.game_env.init_col, tuple(0 for g in self.game_env.gem_positions))
+            self.persistent_state = GameState(self.game_env.init_row, self.game_env.init_col,
+                                              tuple(0 for g in self.game_env.gem_positions))
 
             # self.print_values()
             # print(f'____________ Starting new Episode at: {self.persistent_state} ____________')
@@ -267,7 +279,7 @@ class RLSolver:
             self.persistent_state, self.persistent_action, seed=time.time())
 
         if next_state == get_exit_state(self.game_env):
-            reward = 100000
+            reward = 1000000
 
         # ===== update value table =====
         # Q(s,a) <-- Q(s,a) + alpha * (temporal difference)
@@ -361,11 +373,13 @@ class RLSolver:
                     stable_iterations = 0
                 last_best_action = current_best_action
 
-                if full_episodes % 1000 == 0:
+                if full_episodes % 2000 == 0:
                     print(self.q_values)
-                    self.print_values_and_policy((0, 0))
-                    self.print_values_and_policy((1, 0))
-                    self.print_values_and_policy((1, 1))
+                    # self.print_values_and_policy((0, 0))
+                    # self.print_values_and_policy((1, 0))
+                    # self.print_values_and_policy((1, 1))
+                    self.print_values_and_policy((0,))
+                    self.print_values_and_policy((1,))
                     print(f'######### STABLE EPISODES: {stable_iterations}')
                     print(f'Num Full Episodes: {full_episodes}')
                     # quit()
@@ -607,3 +621,4 @@ def get_legal_actions(game_env: GameEnv, state: GameState):
                 legal_actions.append(action)
 
     return legal_actions
+
