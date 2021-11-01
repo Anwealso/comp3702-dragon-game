@@ -69,7 +69,7 @@ class RLAgent:
 
         self.solver = RLSolver(game_env)
 
-    def run_training(self):
+    def run_training(self, max_batch_episodes):
         """
         This method will be called once at the beginning of each episode.
 
@@ -90,18 +90,10 @@ class RLAgent:
         # while (self.game_env.get_total_reward() > self.game_env.training_reward_tgt) and \
         #         (time.time() - t0 < self.game_env.training_time - 1):
 
-        while time.time() - t0 < self.game_env.training_time - 1:
-
-            # TODO: Code for training can go here
-
-            # if iterations % 1000 == 0:
-            #     print(f'Iteration {iterations}: ')
-            #     self.solver.print_values_and_policy(self.solver.persistent_state.gem_status)
-            #     print(f'Current State: {self.solver.persistent_state}.')
-            #     _ = input("Press Enter to Continue...")
-            #     print("")
-            #     print("")
-            #     pass
+        print("@@@")
+        print(full_episodes)
+        print(max_batch_episodes)
+        while full_episodes < max_batch_episodes:
 
             if self.algorithm == "qlearning":
                 # run qlearning training
@@ -126,15 +118,17 @@ class RLAgent:
 
             iterations = iterations + 1
 
+        full_episodes = 0
+
         print("_____________________________ FINISHED TRAINING _____________________________")
-        print(self.solver.q_values)
+        # print(self.solver.q_values)
 
         # self.solver.print_values_and_policy((0, 0))
         # self.solver.print_values_and_policy((1, 0))
         # self.solver.print_values_and_policy((1, 1))
 
-        self.solver.print_values_and_policy((0,))
-        self.solver.print_values_and_policy((1,))
+        # self.solver.print_values_and_policy((0,))
+        # self.solver.print_values_and_policy((1,))
 
         print(f'Completed {iterations} iterations (across {episodes} episodes, of which {full_episodes} full episodes) '
               f'of training in {round(time.time() - t0, 1)} seconds.')
@@ -168,7 +162,7 @@ class RLSolver:
         """
         self.game_env = game_env
         self.epsilon = 0.6
-        self.alpha = 0.01  # OG learning rate 0.1, wanted reduce it to get more stale convergence
+        self.alpha = 0.005  # OG learning rate 0.1, wanted reduce it to get more stale convergence
         self.discount = 0.9
 
         self.states = get_states(self.game_env)  # list of all possible states we can be in (includes lava,
@@ -377,15 +371,15 @@ class RLSolver:
                     stable_iterations = 0
                 last_best_action = current_best_action
 
-                if full_episodes % 1000 == 0:
-                    print(self.q_values)
-                    # self.print_values_and_policy((0, 0))
-                    # self.print_values_and_policy((1, 0))
-                    # self.print_values_and_policy((1, 1))
-                    self.print_values_and_policy((0,))
-                    self.print_values_and_policy((1,))
-                    print(f'######### STABLE EPISODES: {stable_iterations}')
-                    print(f'Num Full Episodes: {full_episodes}')
+                # if full_episodes % 1000 == 0:
+                #     print(self.q_values)
+                #     # self.print_values_and_policy((0, 0))
+                #     # self.print_values_and_policy((1, 0))
+                #     # self.print_values_and_policy((1, 1))
+                #     self.print_values_and_policy((0,))
+                #     self.print_values_and_policy((1,))
+                #     print(f'######### STABLE EPISODES: {stable_iterations}')
+                #     print(f'Num Full Episodes: {full_episodes}')
                     # quit()
                     # _ = input("Press Enter to Continue...")
 

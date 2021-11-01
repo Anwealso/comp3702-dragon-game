@@ -2,6 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="753d17b0-6233-4a24-8408-e8a83b4c3607" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/graph_simulator.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/graph_solution.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/solution.py" beforeDir="false" afterPath="$PROJECT_DIR$/solution.py" afterDir="false" />
     </list>
@@ -17,10 +19,22 @@
   <component name="FileEditorManager">
     <leaf>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/GridWorld_RL_soln.py">
+        <entry file="file://$PROJECT_DIR$/solution.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="222">
-              <caret line="102" column="18" lean-forward="true" selection-start-line="102" selection-start-column="18" selection-end-line="102" selection-end-column="18" />
+            <state relative-caret-position="237">
+              <caret line="116" column="53" selection-start-line="116" selection-start-column="36" selection-end-line="116" selection-end-column="53" />
+              <folding>
+                <element signature="e#0#11#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/graph_solution.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="150">
+              <caret line="164" column="26" selection-start-line="164" selection-start-column="26" selection-end-line="164" selection-end-column="26" />
               <folding>
                 <element signature="e#0#11#0" expanded="true" />
               </folding>
@@ -29,24 +43,12 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/solution.py">
+        <entry file="file://$PROJECT_DIR$/graph_simulator.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="227">
-              <caret line="121" column="53" lean-forward="true" selection-start-line="121" selection-start-column="53" selection-end-line="121" selection-end-column="53" />
+            <state relative-caret-position="221">
+              <caret line="17" lean-forward="true" selection-start-line="17" selection-end-line="17" />
               <folding>
-                <element signature="e#0#11#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/game_env.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="90">
-              <caret line="265" selection-start-line="265" selection-end-line="265" />
-              <folding>
-                <element signature="e#0#13#0" expanded="true" />
+                <element signature="e#0#10#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -55,10 +57,22 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/simulator.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="258">
-              <caret line="177" column="34" selection-start-line="177" selection-start-column="27" selection-end-line="177" selection-end-column="34" />
+            <state relative-caret-position="665">
+              <caret line="101" column="42" lean-forward="true" selection-start-line="101" selection-start-column="42" selection-end-line="101" selection-end-column="42" />
               <folding>
                 <element signature="e#0#10#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/game_env.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="3445">
+              <caret line="265" selection-start-line="265" selection-end-line="265" />
+              <folding>
+                <element signature="e#0#13#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -109,23 +123,12 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>sars</find>
-      <find>perform</find>
-      <find>TERM</find>
-      <find>reward</find>
-      <find>print</find>
-      <find>death</find>
-      <find>enter</find>
-      <find>persistent_state</find>
-      <find>self.persistent_state = GameSta</find>
       <find>(1, 1)</find>
       <find>(next_state, action1) not in self.q_values.keys()</find>
       <find>GameState</find>
       <find>self.persistent_state</find>
       <find>self.persistent_state =</find>
       <find>persistent_state = GameState</find>
-      <find>alpha</find>
-      <find>input</find>
       <find>1500</find>
       <find>persistent_state =</find>
       <find>self.persistent_state =</find>
@@ -135,10 +138,21 @@
       <find>sarsa</find>
       <find>lf.persistent_state =</find>
       <find>per</find>
-      <find>None</find>
-      <find>core for this testcase i</find>
       <find>full_episodes</find>
       <find>qLear</find>
+      <find>____________ FINISHED TRAINING _____________</find>
+      <find>policy ====</find>
+      <find>print_values_and_policy</find>
+      <find>.print_values_and_policy((0, 0</find>
+      <find>core for this testcase i</find>
+      <find>select_a</find>
+      <find>None</find>
+      <find>TimeOutException</find>
+      <find>input</find>
+      <find>4000</find>
+      <find>print</find>
+      <find>a`</find>
+      <find>alpha</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -155,6 +169,8 @@
         <option value="$PROJECT_DIR$/GridWorld_RL_soln.py" />
         <option value="$PROJECT_DIR$/testcases/a3-t4.txt" />
         <option value="$PROJECT_DIR$/solution.py" />
+        <option value="$PROJECT_DIR$/graph_solution.py" />
+        <option value="$PROJECT_DIR$/graph_simulator.py" />
       </list>
     </option>
   </component>
@@ -306,15 +322,28 @@
       <option name="project" value="LOCAL" />
       <updated>1635732307488</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="Solving 1, 4, and 3 :D">
+      <created>1635732753633</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1635732753633</updated>
+    </task>
+    <task id="LOCAL-00012" summary="Solving 1 and 3 perfectly, and 4 and 5 with slightly higher than optimal training cost. &#10;(Overall autograder score of 49.0/60.0 = ~82%)">
+      <created>1635735090864</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1635735090864</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="1280" height="800" extended-state="0" />
-    <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.69573283" visible="true" weight="0.16203336" />
-      <window_info id="Structure" order="1" sideWeight="0.30426717" side_tool="true" weight="0.16203336" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.6963947" visible="true" weight="0.16203336" />
+      <window_info id="Structure" order="1" sideWeight="0.3041825" side_tool="true" weight="0.16203336" />
       <window_info id="Favorites" order="2" sideWeight="0.5029586" side_tool="true" weight="0.16600476" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32970297" />
@@ -324,7 +353,7 @@
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Version Control" order="7" />
-      <window_info active="true" anchor="bottom" id="Terminal" order="8" visible="true" weight="0.26164383" />
+      <window_info anchor="bottom" id="Terminal" order="8" visible="true" weight="0.2780822" />
       <window_info anchor="bottom" id="Python Console" order="9" />
       <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
@@ -359,7 +388,9 @@
     <MESSAGE value="Minor fixes" />
     <MESSAGE value="SOLVES T4 in 4000 full episodes (score of ~6 on test 4)" />
     <MESSAGE value="Solving 1 and 4 but not 3" />
-    <option name="LAST_COMMIT_MESSAGE" value="Solving 1 and 4 but not 3" />
+    <MESSAGE value="Solving 1, 4, and 3 :D" />
+    <MESSAGE value="Solving 1 and 3 perfectly, and 4 and 5 with slightly higher than optimal training cost. &#10;(Overall autograder score of 49.0/60.0 = ~82%)" />
+    <option name="LAST_COMMIT_MESSAGE" value="Solving 1 and 3 perfectly, and 4 and 5 with slightly higher than optimal training cost. &#10;(Overall autograder score of 49.0/60.0 = ~82%)" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/play_game.py">
@@ -427,47 +458,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/testcases/a3-t5.txt">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/game_env.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="90">
-          <caret line="265" selection-start-line="265" selection-end-line="265" />
-          <folding>
-            <element signature="e#0#13#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/simulator.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="258">
-          <caret line="177" column="34" selection-start-line="177" selection-start-column="27" selection-end-line="177" selection-end-column="34" />
-          <folding>
-            <element signature="e#0#10#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/testcases/a3-t2.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="117">
-          <caret line="9" selection-start-line="9" selection-end-line="11" selection-end-column="4" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/testcases/a3-t1.txt">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="104">
           <caret line="8" column="11" lean-forward="true" selection-start-line="8" selection-start-column="11" selection-end-line="8" selection-end-column="11" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/testcases/a3-t3.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="78">
-          <caret line="6" column="26" lean-forward="true" selection-start-line="6" selection-start-column="26" selection-end-line="6" selection-end-column="26" />
         </state>
       </provider>
     </entry>
@@ -478,12 +472,69 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/testcases/a3-t2.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="117">
+          <caret line="9" selection-start-line="9" selection-end-line="11" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/testcases/a3-t3.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="78">
+          <caret line="6" column="26" lean-forward="true" selection-start-line="6" selection-start-column="26" selection-end-line="6" selection-end-column="26" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/game_env.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3445">
+          <caret line="265" selection-start-line="265" selection-end-line="265" />
+          <folding>
+            <element signature="e#0#13#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/testcases/a3-t5.txt">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
     <entry file="file://$PROJECT_DIR$/solution.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="227">
-          <caret line="121" column="53" lean-forward="true" selection-start-line="121" selection-start-column="53" selection-end-line="121" selection-end-column="53" />
+        <state relative-caret-position="237">
+          <caret line="116" column="53" selection-start-line="116" selection-start-column="36" selection-end-line="116" selection-end-column="53" />
           <folding>
             <element signature="e#0#11#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/simulator.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="665">
+          <caret line="101" column="42" lean-forward="true" selection-start-line="101" selection-start-column="42" selection-end-line="101" selection-end-column="42" />
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/graph_solution.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="150">
+          <caret line="164" column="26" selection-start-line="164" selection-start-column="26" selection-end-line="164" selection-end-column="26" />
+          <folding>
+            <element signature="e#0#11#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/graph_simulator.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="221">
+          <caret line="17" lean-forward="true" selection-start-line="17" selection-end-line="17" />
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
           </folding>
         </state>
       </provider>
