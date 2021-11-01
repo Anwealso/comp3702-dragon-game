@@ -114,12 +114,12 @@ class RLAgent:
 
             iterations = iterations + 1
 
-        print("_____________________________ FINISHED TRAINING _____________________________")
-        print(self.solver.q_values)
-
-        self.solver.print_values_and_policy((0, 0))
-        self.solver.print_values_and_policy((1, 0))
-        self.solver.print_values_and_policy((1, 1))
+        # print("_____________________________ FINISHED TRAINING _____________________________")
+        # print(self.solver.q_values)
+        #
+        # self.solver.print_values_and_policy((0, 0))
+        # self.solver.print_values_and_policy((1, 0))
+        # self.solver.print_values_and_policy((1, 1))
 
         print(f'Completed {iterations} iterations (across {episodes} episodes, of which {full_episodes} full episodes) '
               f'of training in {round(time.time() - t0,1)} seconds.')
