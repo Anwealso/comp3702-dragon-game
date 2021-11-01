@@ -43,12 +43,17 @@ class RLAgent:
         This method has an allowed run time of 1 second, and will be terminated by the simulator if not completed within
         the limit.
         """
-        if not (game_env.n_rows == 7 and game_env.n_cols == 12):
-            quit()
 
         # TODO: Initialise any instance variables you require here.
         self.game_env = game_env
-        self.algorithm = "sarsa"
+
+        if self.game_env.n_rows == 7 and self.game_env.n_cols == 12:
+            # SARSA for level 4
+            self.algorithm = "sarsa"
+        else:
+            # qlearning for all other levels
+            self.algorithm = "qlearning"
+
         print(f'ALGORITHM: {self.algorithm}')
 
         self.solver = RLSolver(game_env)
@@ -73,7 +78,7 @@ class RLAgent:
         # while (self.game_env.get_total_reward() > self.game_env.training_reward_tgt) and \
         #         (time.time() - t0 < self.game_env.training_time - 1):
 
-        while time.time() - t0 < self.game_env.training_time - 1 and full_episodes < 4000: # was 10,000
+        while time.time() - t0 < self.game_env.training_time - 1:
 
             # TODO: Code for training can go here
 
@@ -90,9 +95,15 @@ class RLAgent:
                 # run qlearning training
                 self.solver.next_iteration_q()
 
+                if self.game_env.get_total_reward() <= self.game_env.training_reward_tgt:
+                    break
+
             elif self.algorithm == "sarsa":
                 # run sarsa training
                 self.solver.next_iteration_sarsa()
+
+                if full_episodes >= 4000:
+                    break
 
                 # self.solver.print_values()
                 # _ = input("Press Enter to Continue...")
