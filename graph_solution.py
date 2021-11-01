@@ -1,9 +1,9 @@
 import time
+import random as random
+import math as math
 
 from game_env import GameEnv
 from game_state import GameState
-import random as random
-import math as math
 
 """
 solution.py
@@ -30,11 +30,9 @@ current_best_action = None
 last_best_action = None
 MAX_FULL_EPISODES = -1
 
-episodes = 0
 
 class RLAgent:
-
-    def __init__(self, game_env):
+    def __init__(self, game_env: GameEnv):
         """
         Constructor for your solver class.
 
@@ -48,10 +46,6 @@ class RLAgent:
         """
         global MAX_FULL_EPISODES
 
-        self.agent = QLearningAgent(game_env)
-
-        #
-        #
         # TODO: Initialise any instance variables you require here.
         self.game_env = game_env
 
@@ -75,7 +69,7 @@ class RLAgent:
 
         self.solver = RLSolver(game_env)
 
-    def run_training(self):
+    def run_training(self, max_batch_episodes):
         """
         This method will be called once at the beginning of each episode.
 
@@ -90,27 +84,16 @@ class RLAgent:
         global stable_iterations
         global MAX_FULL_EPISODES
         t0 = time.time()
+
         iterations = 0
         # optional: loop for ensuring your code exits before exceeding the reward target or time limit
         # while (self.game_env.get_total_reward() > self.game_env.training_reward_tgt) and \
         #         (time.time() - t0 < self.game_env.training_time - 1):
 
-        while time.time() - t0 < self.game_env.training_time - 1:
-
-        #
-        #
-        # TODO: Code for training can go here
-        #
-        #
-
-            # if iterations % 1000 == 0:
-            #     print(f'Iteration {iterations}: ')
-            #     self.solver.print_values_and_policy(self.solver.persistent_state.gem_status)
-            #     print(f'Current State: {self.solver.persistent_state}.')
-            #     _ = input("Press Enter to Continue...")
-            #     print("")
-            #     print("")
-            #     pass
+        print("@@@")
+        print(full_episodes)
+        print(max_batch_episodes)
+        while full_episodes < max_batch_episodes:
 
             if self.algorithm == "qlearning":
                 # run qlearning training
@@ -134,19 +117,18 @@ class RLAgent:
                 # time.sleep(0.1)
 
             iterations = iterations + 1
-            self.agent.print_values_and_policy()
-            self.agent.print_agent_position()
-            _ = input("Press enter to continue")
+
+        full_episodes = 0
 
         print("_____________________________ FINISHED TRAINING _____________________________")
-        print(self.solver.q_values)
+        # print(self.solver.q_values)
 
         # self.solver.print_values_and_policy((0, 0))
         # self.solver.print_values_and_policy((1, 0))
         # self.solver.print_values_and_policy((1, 1))
 
-        self.solver.print_values_and_policy((0,))
-        self.solver.print_values_and_policy((1,))
+        # self.solver.print_values_and_policy((0,))
+        # self.solver.print_values_and_policy((1,))
 
         print(f'Completed {iterations} iterations (across {episodes} episodes, of which {full_episodes} full episodes) '
               f'of training in {round(time.time() - t0, 1)} seconds.')
@@ -166,18 +148,11 @@ class RLAgent:
         :return: action, the selected action to be performed for the current state
         """
 
-        #
-        #
         # TODO: Code for selecting an action based on learned Q-values can go here
-        #
-        #
-        self.agent.select_action(state)
 
         return self.solver.select_action(state)
 
     # TODO: Code for any additional methods you need can go here
-    #
-    #
 
 
 class RLSolver:
@@ -186,8 +161,12 @@ class RLSolver:
         Constructor for the q-learning class.
         """
         self.game_env = game_env
+        self.epsilon = 0.6
+        self.alpha = 0.005  # OG learning rate 0.1, wanted reduce it to get more stale convergence
+        self.discount = 0.9
 
-        self.states = get_states(game_env)  # all possible states the agent can inhabit in the level
+        self.states = get_states(self.game_env)  # list of all possible states we can be in (includes lava,
+        # but excludes walls - since you cant go inside a wall block)
 
         # self.persistent_state = random.choice(self.states)  # internal state used for training
         # self.persistent_state = GameState(3, 7, (1, 0))
@@ -201,9 +180,6 @@ class RLSolver:
         # print("")
 
         self.q_values = {}  # dict mapping (state, action) to float
-        for state in self.states:
-            for action in self.game_env.ACTIONS:
-                self.q_values[(state, action)] = 0
 
     def next_iteration_q(self):
         global verbose
@@ -395,15 +371,15 @@ class RLSolver:
                     stable_iterations = 0
                 last_best_action = current_best_action
 
-                if full_episodes % 1000 == 0:
-                    print(self.q_values)
-                    # self.print_values_and_policy((0, 0))
-                    # self.print_values_and_policy((1, 0))
-                    # self.print_values_and_policy((1, 1))
-                    self.print_values_and_policy((0,))
-                    self.print_values_and_policy((1,))
-                    print(f'######### STABLE EPISODES: {stable_iterations}')
-                    print(f'Num Full Episodes: {full_episodes}')
+                # if full_episodes % 1000 == 0:
+                #     print(self.q_values)
+                #     # self.print_values_and_policy((0, 0))
+                #     # self.print_values_and_policy((1, 0))
+                #     # self.print_values_and_policy((1, 1))
+                #     self.print_values_and_policy((0,))
+                #     self.print_values_and_policy((1,))
+                #     print(f'######### STABLE EPISODES: {stable_iterations}')
+                #     print(f'Num Full Episodes: {full_episodes}')
                     # quit()
                     # _ = input("Press Enter to Continue...")
 
@@ -425,16 +401,20 @@ class RLSolver:
         # choose the action with the highest Q-value for the given state
         best_q = -math.inf
         best_a = None
-        actions = get_legal_actions(self.game_env, self.persistent_state)
-        for a in actions:
+        for a in self.game_env.ACTIONS:
             if ((state, a) in self.q_values.keys() and
                     self.q_values[(state, a)] > best_q):
                 best_q = self.q_values[(state, a)]
                 best_a = a
 
         if best_a is None:
-            return random.choice(actions)
+            best_a = random.choice(list(self.game_env.ACTIONS))
+            # print(state)
+            # print("No best action")
+            return best_a
         else:
+            # print(state)
+            # print(best_a)
             return best_a
 
     def get_best_action(self, state: GameState):
@@ -487,7 +467,6 @@ class RLSolver:
                     line += '   '
                 elif v != 'XXX':
                     line += str(round(v, 1))
-                    line += '  '
                 else:
                     line += 'XXX '
                 line += ', '
@@ -512,7 +491,7 @@ class RLSolver:
                 elif p == "XXX":
                     line += 'XXX'
                 else:
-                    line += '   '
+                    line += '***'
                 line += ''
             # line += ''
             print(line)
@@ -552,7 +531,6 @@ class RLSolver:
             print(line)
 
     def print_agent_position(self):
-        print('========== Agent Position ==========')
         game_env = self.game_env
         state = self.persistent_state
         for r in range(game_env.n_rows):
@@ -574,25 +552,6 @@ class RLSolver:
                     line += game_env.grid_data[r][c] * 3
             print(line)
         print('\n' * 2)
-
-def get_initial_state(game_env: GameEnv):
-    """
-    Gets the initial agent state (starting position and gem_status) in the game_env for this level
-
-    :param game_env: the game environment for the current map the agent is solving
-    :return: the initial game_state
-    """
-    return GameState(game_env.init_row, game_env.init_col, tuple(0 for _ in game_env.gem_positions))
-
-
-def get_exit_state(game_env: GameEnv):
-    """
-    Gets the exit state in the game_env for this level
-
-    :param game_env: the game environment for the current map the agent is solving
-    :return: the exit game_state
-    """
-    return GameState(game_env.exit_row, game_env.exit_col, tuple(1 for _ in game_env.gem_positions))
 
 
 def get_initial_state(game_env: GameEnv):
@@ -659,3 +618,4 @@ def get_legal_actions(game_env: GameEnv, state: GameState):
                 legal_actions.append(action)
 
     return legal_actions
+
